@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor><authoring_tool>Manual</authoring_tool></contributor>
+    <created>2026-10-01T00:00:00</created>
+    <modified>2026-10-01T00:00:00</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_geometries>
+    <geometry id="dummy-mesh" name="dummy">
+      <mesh>
+        <source id="dummy-mesh-positions">
+          <float_array id="dummy-mesh-positions-array" count="0"></float_array>
+          <technique_common>
+            <accessor source="#dummy-mesh-positions-array" count="0" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="dummy-mesh-vertices">
+          <input semantic="POSITION" source="#dummy-mesh-positions"/>
+        </vertices>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="dummy" name="dummy" type="NODE">
+        <instance_geometry url="#dummy-mesh"/>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

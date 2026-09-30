@@ -321,8 +321,28 @@
     <!-- 5. Dynamic Models (Car and Pedestrian)                    -->
     <!-- ========================================================= -->
 
+    <!-- Additional Obstacles for Realism -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Dumpster</uri>
+      <name>dumpster_1</name>
+      <pose>-3.0 11.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Stop Sign</uri>
+      <name>stop_sign_1</name>
+      <pose>-2.5 1.5 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Stop Sign</uri>
+      <name>stop_sign_2</name>
+      <pose>2.5 -1.5 0 0 0 3.1415</pose>
+    </include>
+
     <!-- Dynamic Moving Patrol Car (Reverting to Trajectory Follower since user requested an infinite pattern) -->
     <actor name="patrol_car">
+      <skin>
+        <filename>dummy.dae</filename>
+      </skin>
       <link name="link">
         <visual name="visual">
           <geometry><box><size>2.8 1.4 0.9</size></box></geometry>
@@ -354,6 +374,9 @@
 
     <!-- Dynamic Pedestrian (Offline Local Primitive Model) -->
     <actor name="dynamic_pedestrian">
+      <skin>
+        <filename>dummy.dae</filename>
+      </skin>
       <link name="link">
         <visual name="visual">
           <geometry><cylinder><radius>0.22</radius><length>1.6</length></cylinder></geometry>
