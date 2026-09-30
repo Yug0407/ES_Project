@@ -1,0 +1,575 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="rl_arena">
+
+    <!-- ========================================================== -->
+    <!-- 1. Physics Engine Settings (ODE, 1ms step size, 1000 Hz)   -->
+    <!-- ========================================================== -->
+    <physics name="default_physics" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+
+    <!-- Essential Gazebo Sim Systems -->
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="gz-sim-contact-system"
+      name="gz::sim::systems::Contact">
+    </plugin>
+
+    <!-- Directional Sunlight -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.3 0.2 -0.9</direction>
+    </light>
+
+    <!-- ========================================================== -->
+    <!-- 2. Dark Asphalt Ground Plane (34m x 34m)                   -->
+    <!-- ========================================================== -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>34 34</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>34 34</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.15 0.15 0.15 1</ambient>
+            <diffuse>0.15 0.15 0.15 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ========================================================== -->
+    <!-- 3. Expanded Perimeter Boundary Walls (24m x 24m)           -->
+    <!-- Spanning X: -12m to +12m, Y: -12m to +12m, Height: 0.5m    -->
+    <!-- ========================================================== -->
+    <!-- North Wall (+X: x = +12.0m) -->
+    <model name="wall_north">
+      <static>true</static>
+      <pose>12.0 0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.15 24.15 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.15 24.15 0.5</size></box></geometry>
+          <material>
+            <ambient>0.25 0.25 0.28 1</ambient>
+            <diffuse>0.4 0.4 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- South Wall (-X: x = -12.0m) -->
+    <model name="wall_south">
+      <static>true</static>
+      <pose>-12.0 0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.15 24.15 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.15 24.15 0.5</size></box></geometry>
+          <material>
+            <ambient>0.25 0.25 0.28 1</ambient>
+            <diffuse>0.4 0.4 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- East Wall (+Y: y = +12.0m) -->
+    <model name="wall_east">
+      <static>true</static>
+      <pose>0 12.0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>24.0 0.15 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>24.0 0.15 0.5</size></box></geometry>
+          <material>
+            <ambient>0.25 0.25 0.28 1</ambient>
+            <diffuse>0.4 0.4 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- West Wall (-Y: y = -12.0m) -->
+    <model name="wall_west">
+      <static>true</static>
+      <pose>0 -12.0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>24.0 0.15 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>24.0 0.15 0.5</size></box></geometry>
+          <material>
+            <ambient>0.25 0.25 0.28 1</ambient>
+            <diffuse>0.4 0.4 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ========================================================== -->
+    <!-- 4. Structured City Blocks (Raised Pedestrian Sidewalks)     -->
+    <!-- Concrete Color: 0.6 0.6 0.6, Height: 0.15m (Z = 0.075m)    -->
+    <!-- ========================================================== -->
+
+    <!-- Block A (North Island): 7.0m (X) x 5.0m (Y) x 0.15m (Z) at (0, 4.5, 0.075) -->
+    <model name="city_block_north">
+      <static>true</static>
+      <pose>0.0 4.5 0.075 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>7.0 5.0 0.15</size></box></geometry>
+        </collision>
+        <visual name="sidewalk_concrete">
+          <geometry><box><size>7.0 5.0 0.15</size></box></geometry>
+          <material>
+            <ambient>0.6 0.6 0.6 1</ambient>
+            <diffuse>0.6 0.6 0.6 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <!-- Island Building / Urban Prop -->
+        <visual name="island_kiosk">
+          <pose>0 0 0.825 0 0 0</pose>
+          <geometry><box><size>2.5 2.0 1.5</size></box></geometry>
+          <material><ambient>0.3 0.35 0.4 1</ambient><diffuse>0.4 0.45 0.55 1</diffuse></material>
+        </visual>
+        <collision name="kiosk_collision">
+          <pose>0 0 0.825 0 0 0</pose>
+          <geometry><box><size>2.5 2.0 1.5</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Block B (South Island): 7.0m (X) x 5.0m (Y) x 0.15m (Z) at (0, -4.5, 0.075) -->
+    <model name="city_block_south">
+      <static>true</static>
+      <pose>0.0 -4.5 0.075 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>7.0 5.0 0.15</size></box></geometry>
+        </collision>
+        <visual name="sidewalk_concrete">
+          <geometry><box><size>7.0 5.0 0.15</size></box></geometry>
+          <material>
+            <ambient>0.6 0.6 0.6 1</ambient>
+            <diffuse>0.6 0.6 0.6 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <!-- Island Pavilion / Urban Prop -->
+        <visual name="island_pavilion">
+          <pose>0 0 0.825 0 0 0</pose>
+          <geometry><box><size>2.5 2.0 1.5</size></box></geometry>
+          <material><ambient>0.35 0.3 0.25 1</ambient><diffuse>0.5 0.4 0.35 1</diffuse></material>
+        </visual>
+        <collision name="pavilion_collision">
+          <pose>0 0 0.825 0 0 0</pose>
+          <geometry><box><size>2.5 2.0 1.5</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- ========================================================== -->
+    <!-- 5. Roadway Markings: Drivable Lanes & Dual Intersection    -->
+    <!-- Lane Dividers (Yellow Dashes) & Edge Lines (Solid White)   -->
+    <!-- ========================================================== -->
+
+    <!-- Central East-West Cross Avenue Centerline (y = 0.0m) -->
+    <model name="lane_yellow_central_cross">
+      <static>true</static>
+      <pose>0.0 0.0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>7.0 0.1 0.002</size></box></geometry>
+          <material><ambient>1 0.8 0 1</ambient><diffuse>1 0.8 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Outer Perimeter Centerlines (Yellow Dashes along Driving Path) -->
+    <!-- South Straight Centerline: y = -9.0m -->
+    <model name="lane_yellow_south_ring">
+      <static>true</static>
+      <pose>0.0 -9.0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>16.0 0.1 0.002</size></box></geometry>
+          <material><ambient>1 0.8 0 1</ambient><diffuse>1 0.8 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- East Straight Centerline: x = 9.0m -->
+    <model name="lane_yellow_east_ring">
+      <static>true</static>
+      <pose>9.0 0.0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.1 16.0 0.002</size></box></geometry>
+          <material><ambient>1 0.8 0 1</ambient><diffuse>1 0.8 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- West Straight Centerline: x = -9.0m -->
+    <model name="lane_yellow_west_ring">
+      <static>true</static>
+      <pose>-9.0 0.0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.1 16.0 0.002</size></box></geometry>
+          <material><ambient>1 0.8 0 1</ambient><diffuse>1 0.8 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Solid White Outer Boundary Lines (Ring Road Outer Curb) -->
+    <model name="edge_white_south_outer">
+      <static>true</static>
+      <pose>0.0 -10.8 0.001 0 0 0</pose>
+      <link name="link"><visual name="visual"><geometry><box><size>20.0 0.12 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link>
+    </model>
+    <model name="edge_white_north_outer">
+      <static>true</static>
+      <pose>0.0 10.8 0.001 0 0 0</pose>
+      <link name="link"><visual name="visual"><geometry><box><size>20.0 0.12 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link>
+    </model>
+    <model name="edge_white_east_outer">
+      <static>true</static>
+      <pose>10.8 0.0 0.001 0 0 0</pose>
+      <link name="link"><visual name="visual"><geometry><box><size>0.12 20.0 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link>
+    </model>
+    <model name="edge_white_west_outer">
+      <static>true</static>
+      <pose>-10.8 0.0 0.001 0 0 0</pose>
+      <link name="link"><visual name="visual"><geometry><box><size>0.12 20.0 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link>
+    </model>
+
+    <!-- Crosswalk Zebra Stripes at Dual Intersection (-3.0m and +3.0m) -->
+    <!-- West Crosswalk at x = -3.2m -->
+    <model name="crosswalk_west_1"><static>true</static><pose>-3.2 -1.0 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+    <model name="crosswalk_west_2"><static>true</static><pose>-3.2 -0.35 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+    <model name="crosswalk_west_3"><static>true</static><pose>-3.2 0.35 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+    <model name="crosswalk_west_4"><static>true</static><pose>-3.2 1.0 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+
+    <!-- East Crosswalk at x = +3.2m -->
+    <model name="crosswalk_east_1"><static>true</static><pose>3.2 -1.0 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+    <model name="crosswalk_east_2"><static>true</static><pose>3.2 -0.35 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+    <model name="crosswalk_east_3"><static>true</static><pose>3.2 0.35 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+    <model name="crosswalk_east_4"><static>true</static><pose>3.2 1.0 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+
+    <!-- ========================================================== -->
+    <!-- 6. Actor 1: Dynamic Pedestrian in Continuous Figure-8      -->
+    <!-- Native SDF Actor with scripted trajectory at 2s intervals  -->
+    <!-- Path: (-3, 0) -> (0, 1.5) -> (3, 0) -> (0, -1.5) -> (-3, 0)-->
+    <!-- Seamless matching start & end waypoints for infinite loop  -->
+    <!-- ========================================================== -->
+    <actor name="dynamic_pedestrian_1">
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.25</radius>
+              <length>1.6</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="torso_visual">
+          <geometry>
+            <cylinder>
+              <radius>0.25</radius>
+              <length>1.6</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.15 0.25 0.45 1</ambient>
+            <diffuse>0.2 0.35 0.65 1</diffuse>
+          </material>
+        </visual>
+        <visual name="head_visual">
+          <pose>0 0 0.9 0 0 0</pose>
+          <geometry>
+            <sphere><radius>0.14</radius></sphere>
+          </geometry>
+          <material>
+            <ambient>0.85 0.65 0.5 1</ambient>
+            <diffuse>0.9 0.7 0.55 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <script>
+        <loop>true</loop>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="figure_eight">
+          <!-- Waypoint 0: Start at (-3, 0) heading toward (0, 1.5) -->
+          <waypoint>
+            <time>0.0</time>
+            <pose>-3.0 0.0 0.85 0 0 0.4636</pose>
+          </waypoint>
+          <!-- Waypoint 1: At (0, 1.5) heading toward (3, 0) -->
+          <waypoint>
+            <time>2.0</time>
+            <pose>0.0 1.5 0.85 0 0 -0.4636</pose>
+          </waypoint>
+          <!-- Waypoint 2: At (3, 0) heading toward (0, -1.5) -->
+          <waypoint>
+            <time>4.0</time>
+            <pose>3.0 0.0 0.85 0 0 -2.6779</pose>
+          </waypoint>
+          <!-- Waypoint 3: At (0, -1.5) heading toward (-3, 0) -->
+          <waypoint>
+            <time>6.0</time>
+            <pose>0.0 -1.5 0.85 0 0 2.6779</pose>
+          </waypoint>
+          <!-- Waypoint 4: Seamless return to (-3, 0) matching Waypoint 0 -->
+          <waypoint>
+            <time>8.0</time>
+            <pose>-3.0 0.0 0.85 0 0 0.4636</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+    <!-- ========================================================== -->
+    <!-- 7. Model 2: Automated Patrol / Vehicle Dummy               -->
+    <!-- Loops the 4 perimeter corners continuously via plugin      -->
+    <!-- TrajectoryFollower: (-9,9) -> (9,9) -> (9,-9) -> (-9,-9)   -->
+    <!-- Starts at (9.0, 9.0) safely opposite the robot spawn       -->
+    <!-- ========================================================== -->
+    <model name="automated_patrol_vehicle">
+      <pose>9.0 9.0 0.35 0 0 -1.5708</pose>
+      <link name="link">
+        <gravity>false</gravity>
+        <inertial>
+          <mass>120.0</mass>
+          <inertia>
+            <ixx>25.0</ixx><iyy>35.0</iyy><izz>45.0</izz>
+            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>1.8 0.9 0.6</size></box></geometry>
+        </collision>
+        <!-- Vehicle Body Visual -->
+        <visual name="chassis">
+          <geometry><box><size>1.8 0.9 0.45</size></box></geometry>
+          <material>
+            <ambient>0.85 0.15 0.1 1</ambient>
+            <diffuse>0.95 0.2 0.15 1</diffuse>
+          </material>
+        </visual>
+        <!-- Amber Patrol Warning Flasher on Roof -->
+        <visual name="flasher">
+          <pose>0 0 0.32 0 0 0</pose>
+          <geometry><cylinder><radius>0.12</radius><length>0.18</length></cylinder></geometry>
+          <material><ambient>1 0.7 0 1</ambient><diffuse>1 0.7 0 1</diffuse></material>
+        </visual>
+        <!-- Headlights -->
+        <visual name="headlight_left">
+          <pose>0.91 0.28 0.0 0 0 0</pose>
+          <geometry><box><size>0.02 0.18 0.1</size></box></geometry>
+          <material><ambient>1 1 0.8 1</ambient><diffuse>1 1 0.8 1</diffuse></material>
+        </visual>
+        <visual name="headlight_right">
+          <pose>0.91 -0.28 0.0 0 0 0</pose>
+          <geometry><box><size>0.02 0.18 0.1</size></box></geometry>
+          <material><ambient>1 1 0.8 1</ambient><diffuse>1 1 0.8 1</diffuse></material>
+        </visual>
+      </link>
+      <plugin
+        filename="gz-sim-trajectory-follower-system"
+        name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <waypoints>
+          <waypoint>9.0 -9.0</waypoint>
+          <waypoint>-9.0 -9.0</waypoint>
+          <waypoint>-9.0 9.0</waypoint>
+          <waypoint>9.0 9.0</waypoint>
+        </waypoints>
+        <force>500</force>
+        <torque>150</torque>
+        <range_tolerance>0.6</range_tolerance>
+      </plugin>
+    </model>
+
+    <!-- ========================================================== -->
+    <!-- 8. Structured Elevation & Speed Challenges                 -->
+    <!-- Two clean speed bumps: Width 3.0m, Length 0.3m, H = 0.04m  -->
+    <!-- One flyover ramp/bridge along North straightaway (y = 9m)  -->
+    <!-- ========================================================== -->
+
+    <!-- Speed Bump 1: Across Central Cross Avenue at x = -1.5m, y = 0.0m -->
+    <model name="speed_bump_central_cross">
+      <static>true</static>
+      <!-- Submerged cylinder producing clean 0.04m arched profile across 3.0m lane -->
+      <pose>-1.5 0.0 -0.21 1.5708 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.25</radius><length>3.0</length></cylinder></geometry>
+        </collision>
+        <visual name="yellow_base">
+          <geometry><cylinder><radius>0.25</radius><length>3.0</length></cylinder></geometry>
+          <material>
+            <ambient>1.0 0.8 0.0 1</ambient>
+            <diffuse>1.0 0.8 0.0 1</diffuse>
+            <specular>0.3 0.3 0.0 1</specular>
+          </material>
+        </visual>
+        <!-- Black Contrast Stripe Accents -->
+        <visual name="black_accent_1">
+          <pose>0 0 -0.75 0 0 0</pose>
+          <geometry><cylinder><radius>0.251</radius><length>0.35</length></cylinder></geometry>
+          <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material>
+        </visual>
+        <visual name="black_accent_2">
+          <pose>0 0 0.75 0 0 0</pose>
+          <geometry><cylinder><radius>0.251</radius><length>0.35</length></cylinder></geometry>
+          <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Speed Bump 2: Across East Ring Road at x = 9.0m, y = 0.0m -->
+    <model name="speed_bump_east_straight">
+      <static>true</static>
+      <pose>9.0 0.0 -0.21 0 1.5708 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.25</radius><length>3.0</length></cylinder></geometry>
+        </collision>
+        <visual name="yellow_base">
+          <geometry><cylinder><radius>0.25</radius><length>3.0</length></cylinder></geometry>
+          <material>
+            <ambient>1.0 0.8 0.0 1</ambient>
+            <diffuse>1.0 0.8 0.0 1</diffuse>
+            <specular>0.3 0.3 0.0 1</specular>
+          </material>
+        </visual>
+        <visual name="black_accent_1">
+          <pose>-0.75 0 0 0 0 0</pose>
+          <geometry><cylinder><radius>0.251</radius><length>0.35</length></cylinder></geometry>
+          <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material>
+        </visual>
+        <visual name="black_accent_2">
+          <pose>0.75 0 0 0 0 0</pose>
+          <geometry><cylinder><radius>0.251</radius><length>0.35</length></cylinder></geometry>
+          <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Flyover / Bridge (North Outer Ring Road at y = 9.0m) -->
+    <!-- Incline Ramp: Spans x = -3.5m to -1.5m, Rise 0.25m (~7 deg, 0.124 rad) -->
+    <model name="flyover_incline">
+      <static>true</static>
+      <pose>-2.5 9.0 0.125 0 -0.124 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>2.02 3.0 0.05</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>2.02 3.0 0.05</size></box></geometry>
+          <material>
+            <ambient>0.2 0.2 0.22 1</ambient>
+            <diffuse>0.26 0.26 0.28 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Elevated Straight Span: Spans x = -1.5m to +1.5m at height z = 0.25m -->
+    <model name="flyover_straight_span">
+      <static>true</static>
+      <pose>0.0 9.0 0.125 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>3.0 3.0 0.25</size></box></geometry>
+        </collision>
+        <visual name="deck_visual">
+          <geometry><box><size>3.0 3.0 0.25</size></box></geometry>
+          <material>
+            <ambient>0.22 0.22 0.25 1</ambient>
+            <diffuse>0.3 0.3 0.33 1</diffuse>
+          </material>
+        </visual>
+        <!-- Flyover Outer Guard Rails -->
+        <visual name="rail_north">
+          <pose>0 1.52 0.2 0 0 0</pose>
+          <geometry><box><size>3.0 0.05 0.25</size></box></geometry>
+          <material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material>
+        </visual>
+        <visual name="rail_south">
+          <pose>0 -1.52 0.2 0 0 0</pose>
+          <geometry><box><size>3.0 0.05 0.25</size></box></geometry>
+          <material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Descent Ramp: Spans x = +1.5m to +3.5m, Slopes down from z = 0.25m to 0m -->
+    <model name="flyover_descent">
+      <static>true</static>
+      <pose>2.5 9.0 0.125 0 0.124 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>2.02 3.0 0.05</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>2.02 3.0 0.05</size></box></geometry>
+          <material>
+            <ambient>0.2 0.2 0.22 1</ambient>
+            <diffuse>0.26 0.26 0.28 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ========================================================== -->
+    <!-- 9. Safe Robot Starting Spawn Area                          -->
+    <!-- Position: (-9.0, -9.0, 0.05)                               -->
+    <!-- Facing: North (+Y) along the wide outer driving lane       -->
+    <!-- Fully cleared, legal driving corridor around entire grid   -->
+    <!-- ========================================================== -->
+
+  </world>
+</sdf>
