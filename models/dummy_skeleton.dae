@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor><authoring_tool>Manual</authoring_tool></contributor>
+    <created>2026-10-01T00:00:00</created>
+    <modified>2026-10-01T00:00:00</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_geometries>
+    <geometry id="dummy-mesh" name="dummy">
+      <mesh>
+        <source id="dummy-mesh-positions">
+          <float_array id="dummy-mesh-positions-array" count="9">0 0 0  0.001 0 0  0 0.001 0</float_array>
+          <technique_common>
+            <accessor source="#dummy-mesh-positions-array" count="3" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="dummy-mesh-vertices">
+          <input semantic="POSITION" source="#dummy-mesh-positions"/>
+        </vertices>
+        <polylist count="1">
+          <input semantic="VERTEX" source="#dummy-mesh-vertices" offset="0"/>
+          <vcount>3</vcount>
+          <p>0 1 2</p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_controllers>
+    <controller id="dummy-skin" name="dummy">
+      <skin source="#dummy-mesh">
+        <bind_shape_matrix>1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</bind_shape_matrix>
+        <source id="dummy-skin-joints">
+          <Name_array id="dummy-skin-joints-array" count="1">RootBone</Name_array>
+          <technique_common>
+            <accessor source="#dummy-skin-joints-array" count="1" stride="1">
+              <param name="JOINT" type="name"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="dummy-skin-bind_poses">
+          <float_array id="dummy-skin-bind_poses-array" count="16">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#dummy-skin-bind_poses-array" count="1" stride="16">
+              <param name="TRANSFORM" type="float4x4"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="dummy-skin-weights">
+          <float_array id="dummy-skin-weights-array" count="1">1</float_array>
+          <technique_common>
+            <accessor source="#dummy-skin-weights-array" count="1" stride="1">
+              <param name="WEIGHT" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <joints>
+          <input semantic="JOINT" source="#dummy-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#dummy-skin-bind_poses"/>
+        </joints>
+        <vertex_weights count="3">
+          <input semantic="JOINT" source="#dummy-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#dummy-skin-weights" offset="1"/>
+          <vcount>1 1 1</vcount>
+          <v>0 0 0 0 0 0</v>
+        </vertex_weights>
+      </skin>
+    </controller>
+  </library_controllers>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="RootBone" name="RootBone" sid="RootBone" type="JOINT">
+        <matrix>1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+      </node>
+      <node id="dummy" name="dummy" type="NODE">
+        <instance_controller url="#dummy-skin">
+          <skeleton>#RootBone</skeleton>
+        </instance_controller>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

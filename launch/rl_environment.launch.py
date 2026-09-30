@@ -6,7 +6,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-    pkg_rl_project = os.path.expanduser('~/rl-project')
+    pkg_rl_project = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     
     # 1. Launch Road World + Robot Spawn
     road_world_launch = IncludeLaunchDescription(
@@ -25,3 +25,9 @@ def generate_launch_description():
         road_world_launch,
         env_node,
     ])
+
+if __name__ == '__main__':
+    from launch import LaunchService
+    ls = LaunchService()
+    ls.include_launch_description(generate_launch_description())
+    ls.run()

@@ -18,6 +18,8 @@ world file is being used.
 """
 
 import os
+os.environ['TURTLEBOT3_MODEL'] = 'waffle_pi'
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
@@ -27,18 +29,16 @@ from launch_ros.substitutions import FindPackageShare
 
 
 # ---- Standard starting point convention for ALL road worlds in this project ----
-ROAD_START_X = '-15.0'
+ROAD_START_X = '0.0'
 ROAD_START_Y = '0.0'
-ROAD_START_YAW = '0.0'   # facing along +X (down the road)
+ROAD_START_YAW = '1.5708'   # facing North
 
 
 def generate_launch_description():
 
-    # Default world file = our own road_world.sdf, sitting in ~/rl-project/worlds/
-    default_world = os.path.join(
-        os.path.expanduser('~/rl-project/worlds'),
-        'road_world.sdf'
-    )
+    # Default world file = our new city_world.sdf
+    project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    default_world = os.path.join(project_dir, 'worlds', 'city_world.sdf')
 
     world_file_arg = DeclareLaunchArgument(
         'world_file',
@@ -57,7 +57,7 @@ def generate_launch_description():
                 'gz_sim.launch.py'
             ])
         ),
-        launch_arguments={'gz_args': world_file}.items()
+        launch_arguments={'gz_args': ['-r ', world_file]}.items()
     )
 
     # --- Spawn the TurtleBot3 robot at the start of the road ---
