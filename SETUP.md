@@ -78,11 +78,13 @@ colcon build --symlink-install
 
 This takes 5-15 minutes. You should see `Summary: 15 packages finished` at the end with **no red "Failed" lines**. If you see errors, screenshot and share with the team.
 
+> **Note:** Our team has standardized on the **Waffle Pi** model (not Burger). Make sure everyone uses `waffle_pi` so results/videos are consistent.
+
 ## 9. Source the workspace and set robot model
 
 ```bash
 echo "source ~/turtlebot3_ws/install/setup.bash" >> ~/.bashrc
-echo "export TURTLEBOT3_MODEL=burger" >> ~/.bashrc
+echo "export TURTLEBOT3_MODEL=waffle_pi" >> ~/.bashrc
 source ~/.bashrc
 ```
 
