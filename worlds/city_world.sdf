@@ -24,7 +24,7 @@
       <direction>-0.3 0.2 -0.9</direction>
     </light>
 
-    <!-- General Base Ground -->
+    <!-- General Base Ground (Grass/Park Green) -->
     <model name="base_ground">
       <static>true</static>
       <link name="link">
@@ -34,8 +34,9 @@
         <visual name="visual">
           <geometry><plane><normal>0 0 1</normal><size>60 60</size></plane></geometry>
           <material>
-            <ambient>0.3 0.3 0.3 1</ambient>
-            <diffuse>0.3 0.3 0.3 1</diffuse>
+            <ambient>0.2 0.5 0.2 1</ambient>
+            <diffuse>0.25 0.6 0.25 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
           </material>
         </visual>
       </link>
@@ -47,7 +48,7 @@
     <!-- Width: 4.0m. Z = 0.001m.                                  -->
     <!-- ========================================================= -->
 
-    <!-- Road Beds (Dark Grey 0.15 0.15 0.15) -->
+    <!-- Road Beds (Dark Tarmac Tone) -->
     <model name="road_network">
       <static>true</static>
       <link name="link">
@@ -55,42 +56,42 @@
         <visual name="ns_boulevard">
           <pose>0 0 0.001 0 0 0</pose>
           <geometry><box><size>4.0 24.0 0.002</size></box></geometry>
-          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+          <material><ambient>0.18 0.18 0.18 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
         
         <!-- Central East-West Cross Avenue -->
         <visual name="ew_avenue">
           <pose>0 0 0.001 0 0 0</pose>
           <geometry><box><size>24.0 4.0 0.002</size></box></geometry>
-          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+          <material><ambient>0.18 0.18 0.18 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
 
         <!-- Outer Perimeter Ring: North -->
         <visual name="ring_north">
           <pose>0 12.0 0.001 0 0 0</pose>
           <geometry><box><size>28.0 4.0 0.002</size></box></geometry>
-          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+          <material><ambient>0.18 0.18 0.18 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
 
         <!-- Outer Perimeter Ring: South -->
         <visual name="ring_south">
           <pose>0 -12.0 0.001 0 0 0</pose>
           <geometry><box><size>28.0 4.0 0.002</size></box></geometry>
-          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+          <material><ambient>0.18 0.18 0.18 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
 
         <!-- Outer Perimeter Ring: East -->
         <visual name="ring_east">
           <pose>12.0 0 0.001 0 0 0</pose>
           <geometry><box><size>4.0 28.0 0.002</size></box></geometry>
-          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+          <material><ambient>0.18 0.18 0.18 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
 
         <!-- Outer Perimeter Ring: West -->
         <visual name="ring_west">
           <pose>-12.0 0 0.001 0 0 0</pose>
           <geometry><box><size>4.0 28.0 0.002</size></box></geometry>
-          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+          <material><ambient>0.18 0.18 0.18 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
 
         <!-- White Side Borders (Outer Ring Exterior) -->
@@ -202,12 +203,125 @@
       <pose>15.0 -5.0 0 0 0 0</pose>
     </include>
 
+    <!-- Additional Pine Trees -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri>
+      <name>pine_tree_3</name>
+      <pose>8.0 8.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri>
+      <name>pine_tree_4</name>
+      <pose>-8.0 8.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri>
+      <name>pine_tree_5</name>
+      <pose>-8.0 -8.0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri>
+      <name>pine_tree_6</name>
+      <pose>8.0 -8.0 0 0 0 0</pose>
+    </include>
+
+    <!-- Street Lights (4 corners of central intersection) -->
+    <model name="street_light_1">
+      <static>true</static>
+      <pose>3.0 3.0 0 0 0 0</pose>
+      <link name="link">
+        <visual name="pole">
+          <pose>0 0 1.75 0 0 0</pose>
+          <geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material>
+        </visual>
+        <visual name="arm">
+          <pose>-0.5 0 3.4 0 1.5708 0</pose>
+          <geometry><cylinder><radius>0.04</radius><length>1.0</length></cylinder></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material>
+        </visual>
+        <collision name="collision">
+          <pose>0 0 1.75 0 0 0</pose>
+          <geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="street_light_2">
+      <static>true</static>
+      <pose>-3.0 3.0 0 0 0 3.1415</pose>
+      <link name="link">
+        <visual name="pole"><pose>0 0 1.75 0 0 0</pose><geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry><material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+        <visual name="arm"><pose>-0.5 0 3.4 0 1.5708 0</pose><geometry><cylinder><radius>0.04</radius><length>1.0</length></cylinder></geometry><material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+        <collision name="collision"><pose>0 0 1.75 0 0 0</pose><geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry></collision>
+      </link>
+    </model>
+    <model name="street_light_3">
+      <static>true</static>
+      <pose>-3.0 -3.0 0 0 0 3.1415</pose>
+      <link name="link">
+        <visual name="pole"><pose>0 0 1.75 0 0 0</pose><geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry><material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+        <visual name="arm"><pose>-0.5 0 3.4 0 1.5708 0</pose><geometry><cylinder><radius>0.04</radius><length>1.0</length></cylinder></geometry><material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+        <collision name="collision"><pose>0 0 1.75 0 0 0</pose><geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry></collision>
+      </link>
+    </model>
+    <model name="street_light_4">
+      <static>true</static>
+      <pose>3.0 -3.0 0 0 0 0</pose>
+      <link name="link">
+        <visual name="pole"><pose>0 0 1.75 0 0 0</pose><geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry><material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+        <visual name="arm"><pose>-0.5 0 3.4 0 1.5708 0</pose><geometry><cylinder><radius>0.04</radius><length>1.0</length></cylinder></geometry><material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+        <collision name="collision"><pose>0 0 1.75 0 0 0</pose><geometry><cylinder><radius>0.08</radius><length>3.5</length></cylinder></geometry></collision>
+      </link>
+    </model>
+
+    <!-- Traffic Barricades near Ramp -->
+    <model name="barricade_1">
+      <static>true</static>
+      <pose>-12.0 -4.0 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>1.5 0.2 0.8</size></box></geometry>
+          <material><ambient>1 0.5 0 1</ambient><diffuse>1 0.5 0 1</diffuse></material>
+        </visual>
+        <collision name="collision">
+          <geometry><box><size>1.5 0.2 0.8</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="barricade_2">
+      <static>true</static>
+      <pose>-12.0 4.0 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>1.5 0.2 0.8</size></box></geometry>
+          <material><ambient>1 0.5 0 1</ambient><diffuse>1 0.5 0 1</diffuse></material>
+        </visual>
+        <collision name="collision">
+          <geometry><box><size>1.5 0.2 0.8</size></box></geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Fire Hydrant / Small Post -->
+    <model name="fire_hydrant">
+      <static>true</static>
+      <pose>3.0 5.0 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><cylinder><radius>0.15</radius><length>0.8</length></cylinder></geometry>
+          <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.9 0.2 0.2 1</diffuse></material>
+        </visual>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.15</radius><length>0.8</length></cylinder></geometry>
+        </collision>
+      </link>
+    </model>
 
     <!-- ========================================================= -->
     <!-- 5. Dynamic Models (Car and Pedestrian)                    -->
     <!-- ========================================================= -->
 
-    <!-- Dynamic Moving Patrol Car -->
+    <!-- Dynamic Moving Patrol Car (Reverting to Trajectory Follower since user requested an infinite pattern) -->
     <actor name="patrol_car">
       <link name="link">
         <visual name="visual">
