@@ -174,7 +174,31 @@ Create a structured city layout with defined city blocks, dual intersections, an
 
 ---
 
-## 7. World Inspection & Launch Instructions
+## 7. Bug Fixes & Physics Stability Optimization
+
+### 1. Mesh Manager Error Resolution (`Invalid mesh filename extension: __default__`)
+- **Root Cause**: When an SDFormat `<actor>` element is declared without an explicit `<skin><filename>`, SDFormat's internal Actor DOM assigns `__default__` as the skin filename. Gazebo Sim's `MeshManager` subsequently attempts to resolve this filename, fails to find a valid 3D mesh extension (e.g., `.dae` or `.obj`), and throws `[Err] [MeshManager.cc:150] Invalid mesh filename extension: __default__`.
+- **Solution**:
+  - Replaced the `<actor>` tag with a native `<model name="dynamic_pedestrian_1">`.
+  - Constructed the pedestrian using only native primitives: `<cylinder>` for the torso/legs ($R = 0.25\,\text{m}, L = 1.6\,\text{m}$) and `<sphere>` for the head ($R = 0.14\,\text{m}$).
+  - Retained the figure-8 loop path using the verified `gz::sim::systems::TrajectoryFollower` plugin with `<loop>true</loop>`.
+
+### 2. Elimination of Flying / Ejected Dynamic Vehicles
+  - **Re-Enabling Trajectory Animations**:
+    - After ensuring strict Z-axis placement, the `gz-sim-trajectory-follower-system` plugins were successfully re-enabled for both the `dynamic_pedestrian_1` and `automated_patrol_vehicle`.
+    - Both models have `<static>false</static>`, `<kinematic>true</kinematic>`, and `<gravity>false</gravity>` to allow smooth scripted movement without gravity-induced drift or collision ejection.
+  - **Exact Ground Placement (Zero Interpenetration)**:
+    - To prevent any contact issues with the ground plane, Z-axis origins are set strictly to `Height / 2` so bases rest perfectly flush.
+    - `automated_patrol_vehicle`: Center positioned at $z = 0.4\,\text{m}$.
+    - `dynamic_pedestrian_1`: Cylinder Length $1.6\,\text{m}$, center positioned at $z = 0.8\,\text{m}$.
+  - **Visual-Only Road Markings**:
+    - All yellow and white lane stripes, dividing dashes, and crosswalk markings are strictly `<static>true</static>` with `<visual>` tags ONLY (all `<collision>` tags stripped), eliminating any surface collision snags.
+  - **Stationary Models**:
+    - All walls (`wall_*`), city blocks (`city_block_*`), speed bumps, and flyover ramps strictly enforce `<static>true</static>`.
+
+---
+
+## 8. World Inspection & Launch Instructions
 
 To launch and test the world in **WSL (Ubuntu 24.04)**:
 
@@ -184,3 +208,29 @@ gz sim -r worlds/rl_arena.sdf
 ```
 
 > **Note**: Both `worlds/rl_arena.sdf` and `rl_arena.sdf` (root) are kept synchronized for convenience.
+
+
+---
+
+## 9. Stage 6: Modular Structure & High-Fidelity City Simulation
+
+### Objective
+Restructure the project for scalability using professional ROS 2 directory conventions and upgrade the visual quality by transitioning from primitive shapes to high-fidelity Gazebo Fuel models.
+
+### Implementation Details
+- **Modular Directory Architecture**:
+  - `worlds/`: Holds the distinct environments (`city_world.sdf`, `rl_arena.sdf`).
+  - `models/`: Destination directory for all downloaded meshes and Fuel assets.
+  - `scripts/`: Holds utility scripts like `download_city_assets.sh`.
+  - `launch/`: Contains the ROS 2 / Python launch files (e.g., `city_simulation.launch.py`).
+  - `src/`: Prepared for future RL and Gym training nodes.
+- **High-Fidelity Assets (`worlds/city_world.sdf`)**:
+  - Replaced primitive city blocks with official OpenRobotics models pulled directly via `<uri>` links (e.g., `Gas Station`, `House 1`, `House 2`, `SUV`, and `Pine Tree`).
+- **Required Track Features Retained**:
+  - A clean 2-lane asphalt loop for continuous navigation.
+  - Standardized Yellow Speed Bump placed on the West Road.
+  - Incline/Decline Slope Ramp placed on the East Road.
+  - A completely open, flat intersection origin `(0,0,0)` reserved for the robot's safe initial spawn.
+- **Launch Integration**:
+  - Created `scripts/download_city_assets.sh` to properly format the local `GZ_SIM_RESOURCE_PATH`.
+  - Authored `launch/city_simulation.launch.py` using standard `LaunchDescription` and `ExecuteProcess` to programmatically start Gazebo Sim with the correct environment variables pointing to `worlds/city_world.sdf`.

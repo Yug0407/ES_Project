@@ -148,6 +148,7 @@
     <!-- ========================================================== -->
     <!-- 4. Structured City Blocks (Raised Pedestrian Sidewalks)     -->
     <!-- Concrete Color: 0.6 0.6 0.6, Height: 0.15m (Z = 0.075m)    -->
+    <!-- Strictly <static>true</static>                             -->
     <!-- ========================================================== -->
 
     <!-- Block A (North Island): 7.0m (X) x 5.0m (Y) x 0.15m (Z) at (0, 4.5, 0.075) -->
@@ -166,7 +167,7 @@
             <specular>0.2 0.2 0.2 1</specular>
           </material>
         </visual>
-        <!-- Island Building / Urban Prop -->
+        <!-- Island Urban Prop (Native Box Geometry) -->
         <visual name="island_kiosk">
           <pose>0 0 0.825 0 0 0</pose>
           <geometry><box><size>2.5 2.0 1.5</size></box></geometry>
@@ -195,7 +196,7 @@
             <specular>0.2 0.2 0.2 1</specular>
           </material>
         </visual>
-        <!-- Island Pavilion / Urban Prop -->
+        <!-- Island Urban Prop (Native Box Geometry) -->
         <visual name="island_pavilion">
           <pose>0 0 0.825 0 0 0</pose>
           <geometry><box><size>2.5 2.0 1.5</size></box></geometry>
@@ -210,7 +211,8 @@
 
     <!-- ========================================================== -->
     <!-- 5. Roadway Markings: Drivable Lanes & Dual Intersection    -->
-    <!-- Lane Dividers (Yellow Dashes) & Edge Lines (Solid White)   -->
+    <!-- Strictly <static>true</static> with <visual> ONLY          -->
+    <!-- No <collision> tags to prevent any physics snagging        -->
     <!-- ========================================================== -->
 
     <!-- Central East-West Cross Avenue Centerline (y = 0.0m) -->
@@ -226,7 +228,6 @@
     </model>
 
     <!-- Outer Perimeter Centerlines (Yellow Dashes along Driving Path) -->
-    <!-- South Straight Centerline: y = -9.0m -->
     <model name="lane_yellow_south_ring">
       <static>true</static>
       <pose>0.0 -9.0 0.001 0 0 0</pose>
@@ -237,8 +238,6 @@
         </visual>
       </link>
     </model>
-
-    <!-- East Straight Centerline: x = 9.0m -->
     <model name="lane_yellow_east_ring">
       <static>true</static>
       <pose>9.0 0.0 0.001 0 0 0</pose>
@@ -249,8 +248,6 @@
         </visual>
       </link>
     </model>
-
-    <!-- West Straight Centerline: x = -9.0m -->
     <model name="lane_yellow_west_ring">
       <static>true</static>
       <pose>-9.0 0.0 0.001 0 0 0</pose>
@@ -284,7 +281,7 @@
       <link name="link"><visual name="visual"><geometry><box><size>0.12 20.0 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link>
     </model>
 
-    <!-- Crosswalk Zebra Stripes at Dual Intersection (-3.0m and +3.0m) -->
+    <!-- Crosswalk Zebra Stripes at Dual Intersection (-3.2m and +3.2m) -->
     <!-- West Crosswalk at x = -3.2m -->
     <model name="crosswalk_west_1"><static>true</static><pose>-3.2 -1.0 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
     <model name="crosswalk_west_2"><static>true</static><pose>-3.2 -0.35 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
@@ -298,13 +295,18 @@
     <model name="crosswalk_east_4"><static>true</static><pose>3.2 1.0 0.001 0 0 0</pose><link name="link"><visual name="visual"><geometry><box><size>0.5 0.35 0.002</size></box></geometry><material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
 
     <!-- ========================================================== -->
-    <!-- 6. Actor 1: Dynamic Pedestrian in Continuous Figure-8      -->
-    <!-- Native SDF Actor with scripted trajectory at 2s intervals  -->
-    <!-- Path: (-3, 0) -> (0, 1.5) -> (3, 0) -> (0, -1.5) -> (-3, 0)-->
-    <!-- Seamless matching start & end waypoints for infinite loop  -->
+    <!-- 6. Dynamic Pedestrian 1: Continuous Figure-8 Loop          -->
+    <!-- Static: false. Link: kinematic=true, gravity=false         -->
+    <!-- Initial Z: (Cylinder_Height / 2) + 0.05m = 0.85m           -->
+    <!-- Base hovers 0.05m above ground plane to prevent contact    -->
+    <!-- Collision retained for TurtleBot LiDAR detection           -->
     <!-- ========================================================== -->
-    <actor name="dynamic_pedestrian_1">
+    <model name="dynamic_pedestrian_1">
+      <static>false</static>
+      <pose>0.0 0.0 0.8 0 0 0</pose>
       <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
         <collision name="collision">
           <geometry>
             <cylinder>
@@ -336,62 +338,37 @@
           </material>
         </visual>
       </link>
-      <script>
+      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
         <loop>true</loop>
-        <auto_start>true</auto_start>
-        <trajectory id="0" type="figure_eight">
-          <!-- Waypoint 0: Start at (-3, 0) heading toward (0, 1.5) -->
-          <waypoint>
-            <time>0.0</time>
-            <pose>-3.0 0.0 0.85 0 0 0.4636</pose>
-          </waypoint>
-          <!-- Waypoint 1: At (0, 1.5) heading toward (3, 0) -->
-          <waypoint>
-            <time>2.0</time>
-            <pose>0.0 1.5 0.85 0 0 -0.4636</pose>
-          </waypoint>
-          <!-- Waypoint 2: At (3, 0) heading toward (0, -1.5) -->
-          <waypoint>
-            <time>4.0</time>
-            <pose>3.0 0.0 0.85 0 0 -2.6779</pose>
-          </waypoint>
-          <!-- Waypoint 3: At (0, -1.5) heading toward (-3, 0) -->
-          <waypoint>
-            <time>6.0</time>
-            <pose>0.0 -1.5 0.85 0 0 2.6779</pose>
-          </waypoint>
-          <!-- Waypoint 4: Seamless return to (-3, 0) matching Waypoint 0 -->
-          <waypoint>
-            <time>8.0</time>
-            <pose>-3.0 0.0 0.85 0 0 0.4636</pose>
-          </waypoint>
-        </trajectory>
-      </script>
-    </actor>
+        <waypoints>
+          <waypoint>0.0 -2.5</waypoint>
+          <waypoint>0.0 2.5</waypoint>
+        </waypoints>
+        <force>30</force>
+        <torque>20</torque>
+        <range_tolerance>0.2</range_tolerance>
+      </plugin>
+    </model>
 
     <!-- ========================================================== -->
     <!-- 7. Model 2: Automated Patrol / Vehicle Dummy               -->
-    <!-- Loops the 4 perimeter corners continuously via plugin      -->
-    <!-- TrajectoryFollower: (-9,9) -> (9,9) -> (9,-9) -> (-9,-9)   -->
-    <!-- Starts at (9.0, 9.0) safely opposite the robot spawn       -->
+    <!-- Static: false. Link: kinematic=true, gravity=false         -->
+    <!-- Initial Z: (Car_Height / 2) + 0.05m = (0.5/2)+0.05 = 0.30m -->
+    <!-- Base hovers 0.05m above ground plane to prevent contact    -->
+    <!-- Collision retained for TurtleBot LiDAR detection           -->
     <!-- ========================================================== -->
     <model name="automated_patrol_vehicle">
-      <pose>9.0 9.0 0.35 0 0 -1.5708</pose>
+      <static>false</static>
+      <pose>4.0 4.0 0.4 0 0 0</pose>
       <link name="link">
+        <kinematic>true</kinematic>
         <gravity>false</gravity>
-        <inertial>
-          <mass>120.0</mass>
-          <inertia>
-            <ixx>25.0</ixx><iyy>35.0</iyy><izz>45.0</izz>
-            <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-          </inertia>
-        </inertial>
         <collision name="collision">
-          <geometry><box><size>1.8 0.9 0.6</size></box></geometry>
+          <geometry><box><size>1.8 0.9 0.5</size></box></geometry>
         </collision>
-        <!-- Vehicle Body Visual -->
         <visual name="chassis">
-          <geometry><box><size>1.8 0.9 0.45</size></box></geometry>
+          <geometry><box><size>1.8 0.9 0.4</size></box></geometry>
           <material>
             <ambient>0.85 0.15 0.1 1</ambient>
             <diffuse>0.95 0.2 0.15 1</diffuse>
@@ -399,8 +376,8 @@
         </visual>
         <!-- Amber Patrol Warning Flasher on Roof -->
         <visual name="flasher">
-          <pose>0 0 0.32 0 0 0</pose>
-          <geometry><cylinder><radius>0.12</radius><length>0.18</length></cylinder></geometry>
+          <pose>0 0 0.28 0 0 0</pose>
+          <geometry><cylinder><radius>0.1</radius><length>0.16</length></cylinder></geometry>
           <material><ambient>1 0.7 0 1</ambient><diffuse>1 0.7 0 1</diffuse></material>
         </visual>
         <!-- Headlights -->
@@ -415,27 +392,24 @@
           <material><ambient>1 1 0.8 1</ambient><diffuse>1 1 0.8 1</diffuse></material>
         </visual>
       </link>
-      <plugin
-        filename="gz-sim-trajectory-follower-system"
-        name="gz::sim::systems::TrajectoryFollower">
+      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
         <link_name>link</link_name>
         <loop>true</loop>
         <waypoints>
-          <waypoint>9.0 -9.0</waypoint>
-          <waypoint>-9.0 -9.0</waypoint>
-          <waypoint>-9.0 9.0</waypoint>
-          <waypoint>9.0 9.0</waypoint>
+          <waypoint>4.0 4.0</waypoint>
+          <waypoint>-4.0 4.0</waypoint>
+          <waypoint>-4.0 -4.0</waypoint>
+          <waypoint>4.0 -4.0</waypoint>
         </waypoints>
-        <force>500</force>
-        <torque>150</torque>
-        <range_tolerance>0.6</range_tolerance>
+        <force>50</force>
+        <torque>30</torque>
+        <range_tolerance>0.4</range_tolerance>
       </plugin>
     </model>
 
     <!-- ========================================================== -->
     <!-- 8. Structured Elevation & Speed Challenges                 -->
-    <!-- Two clean speed bumps: Width 3.0m, Length 0.3m, H = 0.04m  -->
-    <!-- One flyover ramp/bridge along North straightaway (y = 9m)  -->
+    <!-- Strictly <static>true</static> on all obstacles & ramps    -->
     <!-- ========================================================== -->
 
     <!-- Speed Bump 1: Across Central Cross Avenue at x = -1.5m, y = 0.0m -->
@@ -485,6 +459,7 @@
             <specular>0.3 0.3 0.0 1</specular>
           </material>
         </visual>
+        <!-- Black Contrast Stripe Accents -->
         <visual name="black_accent_1">
           <pose>-0.75 0 0 0 0 0</pose>
           <geometry><cylinder><radius>0.251</radius><length>0.35</length></cylinder></geometry>
