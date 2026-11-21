@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TwistStamped
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
+from rclpy.qos import qos_profile_sensor_data
 from reward_calculator import RewardCalculator
 import math
 
@@ -11,8 +12,9 @@ class GazeboEnvNode(Node):
     def __init__(self):
         super().__init__('gazebo_env_node')
         
-        self.cmd_pub = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_cb, 10)
+        # In ROS 2 Jazzy, the ros_gz bridge expects TwistStamped
+        self.cmd_pub = self.create_publisher(TwistStamped, '/cmd_vel', 10)
+        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_cb, qos_profile_sensor_data)
         self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_cb, 10)
         
         self.reward_calc = RewardCalculator()
@@ -36,9 +38,10 @@ class GazeboEnvNode(Node):
             (0.0, 0.0)    # Stop
         ]
         
-        cmd = Twist()
-        cmd.linear.x = actions[action_idx][0]
-        cmd.angular.z = actions[action_idx][1]
+        cmd = TwistStamped()
+        cmd.header.stamp = self.get_clock().now().to_msg()
+        cmd.twist.linear.x = actions[action_idx][0]
+        cmd.twist.angular.z = actions[action_idx][1]
         self.cmd_pub.publish(cmd)
         
         rclpy.spin_once(self, timeout_sec=0.1)

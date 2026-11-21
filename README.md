@@ -46,6 +46,59 @@ Reinforcement Learning (RL) based object detection on the Gazebo simulator, focu
 
 See [`SETUP.md`](./SETUP.md) for the full step-by-step environment setup guide (copy-paste commands for ROS2, Gazebo, and TurtleBot3).
 
+## Simulation Worlds
+
+All worlds live in `worlds/` and run on **Gazebo Harmonic** (SDFormat 1.9).
+
+| World file | Description | Launch command |
+|---|---|---|
+| `obstacle_world.sdf` | Minimal 20×20 m RL arena — topple-able cylinder | `gz sim -r worlds/obstacle_world.sdf` |
+| `road_world.sdf` | 40×20 m road with slope, speed bumps, sliding pedestrians | `gz sim -r worlds/road_world.sdf` |
+| `rl_arena.sdf` | 24×24 m full urban city grid (main RL training world) | `gz sim -r worlds/rl_arena.sdf` |
+| `city_world.sdf` | High-fidelity city referencing Gazebo Fuel models | `gz sim -r worlds/city_world.sdf` |
+| `duckietown_city.sdf` | Duckietown-style city grid (ported from [theconstructcore/riabot](https://bitbucket.org/theconstructcore/riabot)) | `gz sim -r worlds/duckietown_city.sdf` |
+
+### Running the TurtleBot3 in any world
+
+```bash
+# Source ROS2 and the TurtleBot3 workspace first (in WSL):
+source /opt/ros/jazzy/setup.bash
+source ~/turtlebot3_ws/install/setup.bash
+export TURTLEBOT3_MODEL=waffle_pi
+
+# Duckietown city (dedicated launcher — robot spawns on the road):
+ros2 launch launch/duckietown_world.launch.py
+
+# Duckietown city at a specific road position:
+ros2 launch launch/duckietown_world.launch.py x_pose:=-4.5 y_pose:=3.0
+
+# RL arena:
+ros2 launch launch/road_world_robot.launch.py \
+  world_file:=$(pwd)/worlds/rl_arena.sdf
+
+# Obstacle world:
+ros2 launch launch/road_world_robot.launch.py \
+  world_file:=$(pwd)/worlds/obstacle_world.sdf
+
+# Road world:
+ros2 launch launch/road_world_robot.launch.py \
+  world_file:=$(pwd)/worlds/road_world.sdf
+
+# City world (default):
+ros2 launch launch/road_world_robot.launch.py
+
+# Full RL pipeline (world + robot + gym env node):
+ros2 launch launch/rl_environment.launch.py
+```
+
+### Duckietown city — notes
+
+- World origin: `(0, 0)` — marked by a green disc on the ground.
+- Road rows run east-west at **y = 3**, **y = 9**, **y = 15**.
+- To start the robot on the main street: `x_pose:=-4.5 y_pose:=3.0`.
+- Road segment textures are in `models/duckietown_models/`.
+- Original source: `duckietown_gazebo/worlds/main.world` from [theconstructcore/riabot](https://bitbucket.org/theconstructcore/riabot) (SDF 1.5, classic Gazebo), converted to SDF 1.9 / Gazebo Harmonic.
+
 ## Team
 
 - (Add team member names/GitHub usernames here)

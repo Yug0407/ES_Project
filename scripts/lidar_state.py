@@ -14,6 +14,7 @@ Run this WHILE Gazebo + the robot are already running.
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import LaserScan
 import math
 
@@ -37,12 +38,12 @@ class LidarStateNode(Node):
     def __init__(self):
         super().__init__('lidar_state_node')
 
-        # Subscribe to the LiDAR topic
+        # Subscribe to the LiDAR topic with sensor_data QoS
         self.subscription = self.create_subscription(
             LaserScan,
             '/scan',
             self.scan_callback,
-            10
+            qos_profile_sensor_data
         )
         self.get_logger().info("Lidar State Node started. Listening to /scan...")
 

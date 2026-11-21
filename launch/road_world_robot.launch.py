@@ -1,20 +1,45 @@
 #!/usr/bin/env python3
 """
 road_world_robot.launch.py
+===========================================================================
+Generic launcher: Gazebo + TurtleBot3 (waffle_pi).
+Accepts any ES_Project SDF world via the `world_file` argument.
 
-Launches Gazebo with our custom road world AND spawns the TurtleBot3 robot
-at the BEGINNING of the road, facing forward.
+Usage (default — city_world.sdf):
+    ros2 launch launch/road_world_robot.launch.py
 
-Usage (default — uses worlds/road_world.sdf):
-    ros2 launch road_world_robot.launch.py
+Usage (explicit world):
+    ros2 launch launch/road_world_robot.launch.py world_file:=<path>
 
-Usage (with a different world file, e.g. a teammate's version):
-    ros2 launch road_world_robot.launch.py world_file:=/full/path/to/their_world.sdf
+Available worlds in this project
+---------------------------------
+  worlds/obstacle_world.sdf    – Minimal 20×20 m RL obstacle arena
+  worlds/road_world.sdf        – 40×20 m road with slope, speed bumps,
+                                 sliding pedestrians
+  worlds/rl_arena.sdf          – 24×24 m full urban city grid (RL world)
+  worlds/city_world.sdf        – High-fidelity city (Gazebo Fuel models)
+  worlds/duckietown_city.sdf   – Duckietown-style city grid (ported from
+                                 theconstructcore/riabot on Bitbucket)
 
-Convention: every road world should place the start of the road around
-x = -15, y = 0, with the road running along the +X direction. This way,
-the robot always spawns at the correct starting point regardless of whose
-world file is being used.
+Quick commands
+--------------
+  # Duckietown city (dedicated launcher with road-centre spawn):
+  ros2 launch launch/duckietown_world.launch.py
+
+  # Duckietown city via this generic launcher:
+  ros2 launch launch/road_world_robot.launch.py \
+    world_file:=$(pwd)/worlds/duckietown_city.sdf
+
+  # Bare Gazebo (no ROS2, no robot):
+  gz sim -r worlds/duckietown_city.sdf
+  gz sim -r worlds/rl_arena.sdf
+  gz sim -r worlds/road_world.sdf
+  gz sim -r worlds/obstacle_world.sdf
+
+Convention: the robot always spawns at (ROAD_START_X, ROAD_START_Y).
+For the Duckietown world use duckietown_world.launch.py instead, which
+places the robot on the actual road surface (y=3).
+===========================================================================
 """
 
 import os
@@ -22,16 +47,17 @@ os.environ['TURTLEBOT3_MODEL'] = 'waffle_pi'
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
 
 # ---- Standard starting point convention for ALL road worlds in this project ----
+# Override per world with:  x_pose:=<x> y_pose:=<y>
+# (spawn_turtlebot3.launch.py accepts x_pose/y_pose only; no yaw argument)
 ROAD_START_X = '0.0'
 ROAD_START_Y = '0.0'
-ROAD_START_YAW = '1.5708'   # facing North
 
 
 def generate_launch_description():
@@ -46,7 +72,31 @@ def generate_launch_description():
         description='Full path to the .sdf world file to load'
     )
 
+    x_pose_arg = DeclareLaunchArgument(
+        'x_pose',
+        default_value=ROAD_START_X,
+        description='Robot spawn X. obstacle=0, road_world=-15, rl_arena=-9, '
+                    'city_world=0, duckietown=0 (or -4.5 to sit on the road)'
+    )
+
+    y_pose_arg = DeclareLaunchArgument(
+        'y_pose',
+        default_value=ROAD_START_Y,
+        description='Robot spawn Y. obstacle=0, road_world=0, rl_arena=-9, '
+                    'city_world=0, duckietown=0 (or 3 to sit on the road)'
+    )
+
     world_file = LaunchConfiguration('world_file')
+    x_pose = LaunchConfiguration('x_pose')
+    y_pose = LaunchConfiguration('y_pose')
+
+    # Let Gazebo resolve model textures/meshes under models/
+    # (needed by duckietown_city.sdf road-segment textures and city_world.sdf)
+    models_dir = os.path.join(project_dir, 'models')
+    set_resource_path = SetEnvironmentVariable(
+        name='GZ_SIM_RESOURCE_PATH',
+        value=models_dir
+    )
 
     # --- Start Gazebo with the given world file ---
     gz_sim = IncludeLaunchDescription(
@@ -71,13 +121,16 @@ def generate_launch_description():
             ])
         ),
         launch_arguments={
-            'x_pose': ROAD_START_X,
-            'y_pose': ROAD_START_Y,
+            'x_pose': x_pose,
+            'y_pose': y_pose,
         }.items()
     )
 
     return LaunchDescription([
         world_file_arg,
+        x_pose_arg,
+        y_pose_arg,
+        set_resource_path,
         gz_sim,
         spawn_robot,
     ])

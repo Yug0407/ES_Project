@@ -1,0 +1,804 @@
+<?xml version="1.0" ?>
+<!--
+  duckietown_city.sdf
+  =====================================================================
+  Duckietown-style city grid world for Gazebo Harmonic (SDFormat 1.9).
+
+  Ported from theconstructcore/riabot (Bitbucket) duckietown_gazebo package.
+  Original world: duckietown_gazebo/worlds/main.world (SDF 1.5, classic Gazebo).
+
+  Textures live in:
+    ../models/duckietown_models/<model>/materials/textures/<file>.png
+
+  The world is laid out on approximately a 40x25 m grid centred around
+  the origin.  The TurtleBot3 spawns at (0, 0, 0.05) by default (same
+  convention as the other ES_Project worlds).
+
+  Usage (bare Gazebo, no ROS2):
+      gz sim -r worlds/duckietown_city.sdf
+
+  Usage (ROS2 + TurtleBot3):
+      ros2 launch launch/duckietown_world.launch.py
+
+  Usage (road_world_robot with world override):
+      ros2 launch launch/road_world_robot.launch.py \
+        world_file:=$(pwd)/worlds/duckietown_city.sdf
+  =====================================================================
+-->
+<sdf version="1.9">
+  <world name="duckietown_city">
+
+    <!-- ============================================================
+         Plugins  (same set used across all ES_Project worlds)
+    ============================================================ -->
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+      <engine><filename>gz-physics-dartsim-plugin</filename></engine>
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-contact-system"
+            name="gz::sim::systems::Contact"/>
+
+    <!-- ============================================================
+         Physics  (1 kHz, ODE solver)
+    ============================================================ -->
+    <physics name="ode_1ms" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <!-- ============================================================
+         Scene  (Ogre2 with shadows)
+    ============================================================ -->
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>true</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <!-- ============================================================
+         Sun  (directional light, no shadows to keep it cheap)
+    ============================================================ -->
+    <light name="sun" type="directional">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+    </light>
+
+    <!-- ============================================================
+         Ground plane  (large flat grey surface below the road grid)
+    ============================================================ -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction><ode><mu>100</mu><mu2>50</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==============================================================
+         ROAD GRID  (ported from main.world / main_mod_v2.world)
+
+         Segment types and textures:
+           road_plane   -> road_p.png  (straight, 6x6 m)
+           road_inter   -> road_i.png  (4-way intersection, 6x6 m)
+           road_diag    -> road_d.png  (curved / diagonal, 6x6 m)
+           road_plane_3 -> road3.png   (3-lane straight, 18x6 m)
+
+         All segments are 0.1 m thick boxes raised so their top face
+         sits at z = 0.  The robot drives on z = 0.05 (half-height of
+         the TurtleBot3).
+
+         Texture URIs are relative to the worlds/ directory so Gazebo
+         can resolve them without GZ_SIM_RESOURCE_PATH.
+    ============================================================== -->
+
+    <!-- Helper macro (SDF has no macros; segments are listed explicitly) -->
+
+    <!-- Row 0 (y = 3): horizontal main street -->
+
+    <!-- road_plane_3  [18x6]  central long straight -->
+    <model name="road_straight_long_r0">
+      <static>true</static>
+      <pose>-4.534 3 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>18 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane_3/materials/textures/road3.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_inter at west end of row 0 -->
+    <model name="road_inter_r0_west">
+      <static>true</static>
+      <pose>-16.479 3 0.001 0 0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_inter/materials/textures/road_i.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_plane at far west end -->
+    <model name="road_plane_r0_farwest">
+      <static>true</static>
+      <pose>-22.450 3 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_diag at east end, row 0 -->
+    <model name="road_diag_r0_east">
+      <static>true</static>
+      <pose>7.461 3 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_diag far west, row 0 -->
+    <model name="road_diag_r0_farwest">
+      <static>true</static>
+      <pose>-28.409 3 0.001 0 0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Row 1 (y = 9): middle horizontal street -->
+
+    <!-- road_plane_0: N-S connector at x=-16.478, y=9 -->
+    <model name="road_plane_r1_center">
+      <static>true</static>
+      <pose>-16.478 9 0.001 0 0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_plane_4: straight at x=1.505, y=9 -->
+    <model name="road_plane_r1_east">
+      <static>true</static>
+      <pose>1.505 9 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_diag_0: east diagonal at x=7.474, y=9 -->
+    <model name="road_diag_r1_east">
+      <static>true</static>
+      <pose>7.474 9 0.001 0 0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_diag_1: diagonal connector at x=-4.598, y=9 -->
+    <model name="road_diag_r1_mid">
+      <static>true</static>
+      <pose>-4.598 9 0.001 0 0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_plane_5: west side at x=-28.437, y=9 -->
+    <model name="road_plane_r1_west">
+      <static>true</static>
+      <pose>-28.437 9 0.001 0 0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Row 2 (y = 15): top horizontal street -->
+
+    <!-- road_inter_0: intersection at x=-16.497, y=15 -->
+    <model name="road_inter_r2_center">
+      <static>true</static>
+      <pose>-16.497 15 0.001 0 0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_inter/materials/textures/road_i.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_plane_1: straight at x=-22.470, y=15 -->
+    <model name="road_plane_r2_west">
+      <static>true</static>
+      <pose>-22.470 15 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_plane_2: straight at x=-10.507, y=15 -->
+    <model name="road_plane_r2_mid">
+      <static>true</static>
+      <pose>-10.507 15 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_diag_2: diagonal at x=-4.452, y=15 -->
+    <model name="road_diag_r2_mid">
+      <static>true</static>
+      <pose>-4.452 15 0.001 0 0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- road_diag_3: diagonal at x=-28.436, y=15 -->
+    <model name="road_diag_r2_west">
+      <static>true</static>
+      <pose>-28.436 15 0.001 0 0 -3.14159</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==============================================================
+         BUILDINGS / CITY FURNISHINGS
+         Recreated as simple box primitives since the original meshes
+         reference Gazebo Fuel models not bundled here.
+         Heights and footprints approximate the riabot world.
+    ============================================================== -->
+
+    <!-- Apartment block (west boundary) -->
+    <model name="apartment_block">
+      <static>true</static>
+      <pose>-33.856 1.443 3.0 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>8 10 6</size></box></geometry>
+          <material>
+            <ambient>0.55 0.45 0.4 1</ambient>
+            <diffuse>0.55 0.45 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- House 1 (north-west area) -->
+    <model name="house_1">
+      <static>true</static>
+      <pose>-22.346 24.172 2.0 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>6 6 4</size></box></geometry>
+          <material>
+            <ambient>0.8 0.7 0.6 1</ambient>
+            <diffuse>0.8 0.7 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- House 2 -->
+    <model name="house_2">
+      <static>true</static>
+      <pose>-7.0 22.0 2.0 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>5 5 4</size></box></geometry>
+          <material>
+            <ambient>0.7 0.75 0.65 1</ambient>
+            <diffuse>0.7 0.75 0.65 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- House 3 (east side) -->
+    <model name="house_3">
+      <static>true</static>
+      <pose>7.0 14.568 2.0 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>5 5 4</size></box></geometry>
+          <material>
+            <ambient>0.85 0.75 0.6 1</ambient>
+            <diffuse>0.85 0.75 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Gas station (south-east) -->
+    <model name="gas_station">
+      <static>true</static>
+      <pose>-13.145 -12.439 1.5 0 0 1.572</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>7 10 3</size></box></geometry>
+          <material>
+            <ambient>0.9 0.9 0.3 1</ambient>
+            <diffuse>0.9 0.9 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Fast food building -->
+    <model name="fast_food">
+      <static>true</static>
+      <pose>-24.118 -3.533 2.0 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>6 5 4</size></box></geometry>
+          <material>
+            <ambient>0.9 0.3 0.3 1</ambient>
+            <diffuse>0.9 0.3 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==============================================================
+         LAMP POSTS  (9 posts matching original positions)
+    ============================================================== -->
+
+    <model name="lamp_post_0">
+      <static>true</static>
+      <pose>-23.0 18.0 2.5 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_1">
+      <static>true</static>
+      <pose>-11.0 18.0 2.5 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_2">
+      <static>true</static>
+      <pose>4.0 12.0 2.5 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_3">
+      <static>true</static>
+      <pose>-22.0 0.0 2.5 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_4">
+      <static>true</static>
+      <pose>-10.457 0.0 2.5 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_5">
+      <static>true</static>
+      <pose>1.0 0.0 2.5 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_6">
+      <static>true</static>
+      <pose>-31.407 7.727 2.5 0 0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_7">
+      <static>true</static>
+      <pose>10.510 6.0 2.5 0 0 -1.612</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_8">
+      <static>true</static>
+      <pose>-19.473 9.0 2.5 0 0 1.552</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_9">
+      <static>true</static>
+      <pose>-7.517 9.0 2.5 0 0 1.560</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==============================================================
+         TRAFFIC LIGHTS (Semaforos)
+         Two traffic-light poles as simple boxes with coloured indicator
+    ============================================================== -->
+
+    <!-- Semaforo North (x=-16, y=3) -->
+    <model name="traffic_light_north">
+      <static>true</static>
+      <pose>-16.0 3.0 0 0 0 1.602</pose>
+      <link name="link">
+        <!-- Pole -->
+        <visual name="pole">
+          <pose>0 0 1.5 0 0 0</pose>
+          <geometry><cylinder><radius>0.04</radius><length>3.0</length></cylinder></geometry>
+          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        <!-- Housing -->
+        <visual name="housing">
+          <pose>0 0 3.2 0 0 0</pose>
+          <geometry><box><size>0.2 0.2 0.6</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+        </visual>
+        <!-- Red light -->
+        <visual name="red_light">
+          <pose>0 0.13 3.4 0 0 0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+        <!-- Green light -->
+        <visual name="green_light">
+          <pose>0 0.13 3.1 0 0 0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.1 0.8 0.1 1</diffuse></material>
+        </visual>
+        </link>
+    </model>
+
+    <!-- Semaforo South (x=-16, y=15) -->
+    <model name="traffic_light_south">
+      <static>true</static>
+      <pose>-16.0 15.0 0 0 0 1.602</pose>
+      <link name="link">
+        <visual name="pole">
+          <pose>0 0 1.5 0 0 0</pose>
+          <geometry><cylinder><radius>0.04</radius><length>3.0</length></cylinder></geometry>
+          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        <visual name="housing">
+          <pose>0 0 3.2 0 0 0</pose>
+          <geometry><box><size>0.2 0.2 0.6</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+        </visual>
+        <visual name="red_light">
+          <pose>0 0.13 3.4 0 0 0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+        <visual name="green_light">
+          <pose>0 0.13 3.1 0 0 0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.1 0.8 0.1 1</diffuse></material>
+        </visual>
+        </link>
+    </model>
+
+    <!-- ==============================================================
+         JERSEY BARRIERS  (road boundaries / dividers)
+    ============================================================== -->
+
+    <model name="jersey_barrier_0">
+      <static>true</static>
+      <pose>-5.441 6.0 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.5 0.5 0.8</size></box></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="jersey_barrier_1">
+      <static>true</static>
+      <pose>-2.0 6.0 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.5 0.5 0.8</size></box></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="jersey_barrier_2">
+      <static>true</static>
+      <pose>2.0 6.0 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.5 0.5 0.8</size></box></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==============================================================
+         SPEED LIMIT SIGN
+    ============================================================== -->
+
+    <model name="speed_limit_sign">
+      <static>true</static>
+      <pose>2.0 12.0 0.0 0 0 -1.585</pose>
+      <link name="link">
+        <!-- Post -->
+        <visual name="post">
+          <pose>0 0 0.6 0 0 0</pose>
+          <geometry><cylinder><radius>0.03</radius><length>1.2</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+        <!-- Sign face -->
+        <visual name="sign_face">
+          <pose>0 0 1.3 0 0 0</pose>
+          <geometry><cylinder><radius>0.15</radius><length>0.02</length></cylinder></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+        </visual>
+        <!-- Red ring -->
+        <visual name="red_ring">
+          <pose>0 0 1.31 0 0 0</pose>
+          <geometry><cylinder><radius>0.15</radius><length>0.005</length></cylinder></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+        </link>
+    </model>
+
+    <!-- ==============================================================
+         ROBOT SPAWN MARKER  (thin disc so the user can see start)
+    ============================================================== -->
+    <model name="spawn_marker">
+      <static>true</static>
+      <pose>0.0 0.0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.3</radius><length>0.002</length></cylinder></geometry>
+          <material>
+            <ambient>0.0 0.8 0.0 0.8</ambient>
+            <diffuse>0.0 0.8 0.0 0.8</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
