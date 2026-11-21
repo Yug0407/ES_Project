@@ -1,104 +1,247 @@
-# RL-Based Object Detection & Obstacle Avoidance — Gazebo Simulation
+# RL-Based Obstacle Avoidance & Object Detection in Gazebo
 
-**Course:** Embedded Systems — Group Project
-**Group:** Group 3
+**Course:** Embedded Systems — Group Project  
+**Platform:** ROS 2 Jazzy + Gazebo Harmonic + TurtleBot3 (Waffle Pi)  
+**Host Environment:** Windows 10/11 with WSL2 (Ubuntu 24.04 LTS)
 
-## Problem Statement
+---
 
-Reinforcement Learning (RL) based object detection on the Gazebo simulator, focused on obstacle avoidance and object toppling. The model learns to distinguish obstacles from a valid path using a reward/penalty system that factors in the robot's speed, angular speed, acceleration, and angular acceleration.
+## 📌 Project Overview
 
-## Tech Stack
+This project implements a Reinforcement Learning (RL) pipeline for autonomous mobile robot navigation, obstacle detection, and collision/toppling avoidance using simulated sensor data (LiDAR + Odometry).
 
-| Component | Choice | Why |
+The simulation features multiple custom Gazebo worlds (urban city grids, road networks with speed bumps and slopes, obstacle arenas, and Duckietown city tracks) running on **Gazebo Harmonic (SDF 1.9)** and **ROS 2 Jazzy**.
+
+---
+
+## 💻 Tech Stack & Requirements
+
+| Component | Specification | Description |
 |---|---|---|
-| OS | Ubuntu 24.04 (via WSL2 on Windows) | Required for ROS2 Jazzy compatibility |
-| Robot Middleware | ROS2 Jazzy | Latest LTS-adjacent ROS2 release matching Ubuntu 24.04 |
-| Simulator | Gazebo (new Gazebo / `ros-jazzy-ros-gz`) | Ships with ROS2 Jazzy; industry-standard robotics simulator |
-| Robot Platform | TurtleBot3 (Burger model) | Lightweight, well-documented, widely used for RL/navigation research |
-| Obstacle Sensing | LiDAR (`/scan` topic) | Simpler and more reliable for RL state input than camera-based detection |
-| RL Algorithm | Q-Learning / lightweight DQN *(planned)* | Feasible to train within our project timeline, unlike full deep RL |
-| Language | Python 3 | Standard for ROS2 nodes and RL implementation |
-| Version Control | Git + GitHub | Team collaboration |
+| **Host OS** | Windows 10 (Build 19044+) or Windows 11 | Supports WSL2 and WSLg (GUI acceleration) |
+| **Linux Environment** | Ubuntu 24.04 LTS (WSL2) | Required for ROS 2 Jazzy |
+| **Middleware** | ROS 2 Jazzy Jalisco | Core robotics communication framework |
+| **Simulator** | Gazebo Harmonic (`ros-jazzy-ros-gz`) | Modern Gazebo simulation engine |
+| **Robot Model** | TurtleBot3 (Waffle Pi) | Differential drive robot equipped with 360° LiDAR, IMU, and Camera |
+| **Programming** | Python 3.12 | Nodes, RL environments, and data analysis |
 
-## Why These Choices
+---
 
-- **TurtleBot3 over other robots:** Most tutorials/community support exist for it, and its LiDAR + differential-drive setup fits our obstacle-avoidance problem directly.
-- **LiDAR over camera-based detection:** True vision-based object detection (e.g. YOLO) is a much larger, separate project. Our problem statement asks for obstacle detection via RL rewards/penalties — LiDAR distance readings satisfy this requirement and are far more reliable to get working within our timeframe.
-- **Q-Learning/small DQN over deep RL (PPO, SAC, etc.):** Deep RL requires significantly more training time and tuning than we have. A discretized Q-table or small DQN can still demonstrate the core RL concept (state → action → reward) required by the assignment.
+## 🚀 Complete Installation Guide
 
-## Progress So Far
+Follow these steps sequentially inside your **WSL Ubuntu 24.04 terminal**.
 
-- [x] Installed ROS2 Jazzy on Ubuntu 24.04 (WSL2)
-- [x] Installed Gazebo simulator
-- [x] Built TurtleBot3 packages (Burger model) from source (Jazzy branch)
-- [x] Verified simulation: robot spawns in a Gazebo world with obstacles
-- [x] Verified sensors: LiDAR (`/scan`), odometry (`/odom`), IMU (`/imu`) all publishing correctly
-- [x] Verified manual control: robot drives via keyboard teleop
-- [x] Set up shared GitHub repo for team collaboration
-- [ ] Build custom Gazebo world with a "toppling" object
-- [ ] Write Python node to convert LiDAR data into RL state representation
-- [ ] Define reward function (based on speed, angular speed, acceleration, collision/toppling)
-- [ ] Implement and train Q-Learning / DQN agent
-- [ ] Evaluate trained agent's obstacle-avoidance performance
-- [ ] Record results and prepare final report/demo
-
-## Setup Instructions
-
-See [`SETUP.md`](./SETUP.md) for the full step-by-step environment setup guide (copy-paste commands for ROS2, Gazebo, and TurtleBot3).
-
-## Simulation Worlds
-
-All worlds live in `worlds/` and run on **Gazebo Harmonic** (SDFormat 1.9).
-
-| World file | Description | Launch command |
-|---|---|---|
-| `obstacle_world.sdf` | Minimal 20×20 m RL arena — topple-able cylinder | `gz sim -r worlds/obstacle_world.sdf` |
-| `road_world.sdf` | 40×20 m road with slope, speed bumps, sliding pedestrians | `gz sim -r worlds/road_world.sdf` |
-| `rl_arena.sdf` | 24×24 m full urban city grid (main RL training world) | `gz sim -r worlds/rl_arena.sdf` |
-| `city_world.sdf` | High-fidelity city referencing Gazebo Fuel models | `gz sim -r worlds/city_world.sdf` |
-| `duckietown_city.sdf` | Duckietown-style city grid (ported from [theconstructcore/riabot](https://bitbucket.org/theconstructcore/riabot)) | `gz sim -r worlds/duckietown_city.sdf` |
-
-### Running the TurtleBot3 in any world
-
+### 1. Update Ubuntu System Packages
 ```bash
-# Source ROS2 and the TurtleBot3 workspace first (in WSL):
-source /opt/ros/jazzy/setup.bash
-source ~/turtlebot3_ws/install/setup.bash
-export TURTLEBOT3_MODEL=waffle_pi
-
-# Duckietown city (dedicated launcher — robot spawns on the road):
-ros2 launch launch/duckietown_world.launch.py
-
-# Duckietown city at a specific road position:
-ros2 launch launch/duckietown_world.launch.py x_pose:=-4.5 y_pose:=3.0
-
-# RL arena:
-ros2 launch launch/road_world_robot.launch.py \
-  world_file:=$(pwd)/worlds/rl_arena.sdf
-
-# Obstacle world:
-ros2 launch launch/road_world_robot.launch.py \
-  world_file:=$(pwd)/worlds/obstacle_world.sdf
-
-# Road world:
-ros2 launch launch/road_world_robot.launch.py \
-  world_file:=$(pwd)/worlds/road_world.sdf
-
-# City world (default):
-ros2 launch launch/road_world_robot.launch.py
-
-# Full RL pipeline (world + robot + gym env node):
-ros2 launch launch/rl_environment.launch.py
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y software-properties-common curl git build-essential python3-pip
 ```
 
-### Duckietown city — notes
+### 2. Install ROS 2 Jazzy
+Add the official ROS 2 Jazzy apt repository:
+```bash
+sudo add-apt-repository universe
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-- World origin: `(0, 0)` — marked by a green disc on the ground.
-- Road rows run east-west at **y = 3**, **y = 9**, **y = 15**.
-- To start the robot on the main street: `x_pose:=-4.5 y_pose:=3.0`.
-- Road segment textures are in `models/duckietown_models/`.
-- Original source: `duckietown_gazebo/worlds/main.world` from [theconstructcore/riabot](https://bitbucket.org/theconstructcore/riabot) (SDF 1.5, classic Gazebo), converted to SDF 1.9 / Gazebo Harmonic.
+sudo apt update
+sudo apt install -y ros-jazzy-desktop
+```
 
-## Team
+### 3. Install Gazebo Harmonic & ROS-Gazebo Bridge
+```bash
+sudo apt install -y ros-jazzy-ros-gz ros-jazzy-ros-gz-sim ros-jazzy-ros-gz-bridge ros-jazzy-ros-gz-image
+```
 
-- (Add team member names/GitHub usernames here)
+### 4. Install TurtleBot3 Packages
+Install the pre-built ROS 2 Jazzy TurtleBot3 suite:
+```bash
+sudo apt install -y ros-jazzy-turtlebot3* ros-jazzy-dynamixel-sdk
+```
+
+### 5. Clone This Repository
+```bash
+cd ~
+git clone https://github.com/Yug0407/ES_Project.git
+cd ~/ES_Project
+```
+*(If you are working directly from Windows, your repo path in WSL is `/mnt/c/Users/<YourUsername>/OneDrive/Desktop/ES_Project`)*.
+
+### 6. Configure Environment Variables Automatically
+Add environment configuration to your `~/.bashrc` so ROS 2 and TurtleBot3 settings load automatically every time you open a terminal:
+```bash
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+echo "export TURTLEBOT3_MODEL=waffle_pi" >> ~/.bashrc
+source ~/.bashrc
+```
+
+Verify the installation:
+```bash
+ros2 pkg list | grep turtlebot3
+```
+You should see packages like `turtlebot3_gazebo`, `turtlebot3_teleop`, and `turtlebot3_msgs`.
+
+---
+
+## 🎮 How to Start and Run the Simulation
+
+Always launch the simulation in **Terminal 1** and your controller/scripts in **Terminal 2**.
+
+### Step 1: Launch Gazebo & Spawn the Car (Terminal 1)
+
+Navigate to the project root:
+```bash
+cd ~/ES_Project
+source /opt/ros/jazzy/setup.bash
+export TURTLEBOT3_MODEL=waffle_pi
+```
+
+Choose any of the following worlds to launch:
+
+#### Option A: Duckietown City World (Recommended)
+Spawns the TurtleBot3 directly on the central roadway:
+```bash
+ros2 launch launch/duckietown_world.launch.py x_pose:=-4.5 y_pose:=3.0
+```
+
+#### Option B: Full Urban RL Arena
+24×24 m city grid with perimeter walls and buildings:
+```bash
+ros2 launch launch/road_world_robot.launch.py \
+  world_file:=$(pwd)/worlds/rl_arena.sdf \
+  x_pose:=-9.0 y_pose:=-9.0
+```
+
+#### Option C: Road World with Slopes & Speed Bumps
+40×20 m road featuring speed bumps, incline slopes, and obstacles:
+```bash
+ros2 launch launch/road_world_robot.launch.py \
+  world_file:=$(pwd)/worlds/road_world.sdf \
+  x_pose:=-15.0 y_pose:=0.0
+```
+
+#### Option D: Basic Obstacle Arena
+20×20 m open arena with topple-able cylinders:
+```bash
+ros2 launch launch/road_world_robot.launch.py \
+  world_file:=$(pwd)/worlds/obstacle_world.sdf \
+  x_pose:=0.0 y_pose:=0.0
+```
+
+#### Option E: City World (Default)
+High-fidelity urban environment:
+```bash
+ros2 launch launch/road_world_robot.launch.py \
+  world_file:=$(pwd)/worlds/city_world.sdf \
+  x_pose:=0.0 y_pose:=0.0
+```
+
+> [!IMPORTANT]
+> **Gazebo Play Button:** In Gazebo Sim, make sure the simulation is active. If the timer in the bottom bar is paused, click the **Play (▶)** button on the bottom-left corner so physics and sensors run.
+
+---
+
+### Step 2: Drive and Control the Car (Terminal 2)
+
+Open a **second WSL terminal** while Gazebo is running:
+
+```bash
+cd ~/ES_Project
+source /opt/ros/jazzy/setup.bash
+export TURTLEBOT3_MODEL=waffle_pi
+```
+
+#### 🕹️ Manual Keyboard Teleoperation (Drive with keys):
+```bash
+ros2 run turtlebot3_teleop teleop_keyboard
+```
+* **`w`**: Move forward  
+* **`x`**: Move backward  
+* **`a`**: Turn left  
+* **`d`**: Turn right  
+* **`s`**: Emergency stop  
+
+> [!TIP]
+> **Click inside Terminal 2:** You must click inside the terminal window running `teleop_keyboard` to focus it before pressing keys.
+
+---
+
+### Step 3: Monitor Sensors & RL Nodes (Terminal 2 or 3)
+
+#### 📡 5-Sector LiDAR Observation Monitor:
+Converts 360 raw LiDAR rays into directional proximity zones (`front`, `front_left`, `front_right`, `left`, `right`):
+```bash
+python3 scripts/lidar_state.py
+```
+
+#### 🤖 RL Environment Step Node:
+Runs the gym step loop, calculates speed/acceleration rewards, and sends discrete actions:
+```bash
+python3 scripts/gazebo_env_node.py
+```
+
+#### 📊 Inspect Raw ROS 2 Topics:
+```bash
+# Print LiDAR messages
+ros2 topic echo /scan
+
+# Print robot position & velocity
+ros2 topic echo /odom
+
+# List all active simulation topics
+ros2 topic list
+```
+
+---
+
+## 🛠️ Troubleshooting & Common Fixes
+
+### 1. The Car Is Not Moving
+* **Click into the Teleop Terminal:** If the Gazebo 3D window is focused, pressing `W/A/S/D` will only move the 3D camera. Click into the teleop terminal.
+* **Check the Play button:** Ensure Gazebo's physics engine is running (Play ▶ icon at the bottom-left).
+* **ROS 2 Jazzy Twist format:** ROS 2 Jazzy requires `geometry_msgs/msg/TwistStamped` over `/cmd_vel` rather than un-stamped `Twist`.
+
+### 2. Gazebo Freezes or Says "Found additional publishers"
+If a previous simulation wasn't stopped cleanly, kill all background simulation processes and restart:
+```bash
+killall -9 gz-sim-server gz-sim-gui ruby ros2 parameter_bridge image_bridge 2>/dev/null
+```
+
+### 3. Gazebo Window Does Not Open
+* Ensure WSLg is up to date in Windows PowerShell (Admin):
+  ```powershell
+  wsl --update
+  ```
+* Inside WSL, check that display forwarding is active:
+  ```bash
+  echo $DISPLAY
+  ```
+  *(Should print `:0`)*.
+
+---
+
+## 📂 Repository Structure
+
+```
+ES_Project/
+├── launch/
+│   ├── duckietown_world.launch.py   # Dedicated Duckietown launcher + robot spawner
+│   ├── road_world_robot.launch.py   # Generic launcher for any world + robot spawner
+│   ├── city_simulation.launch.py    # City world launcher
+│   └── rl_environment.launch.py     # World + robot + Gym RL node pipeline
+├── models/
+│   └── duckietown_models/           # Road plane & intersection textures (road3.png, etc.)
+├── scripts/
+│   ├── gazebo_env_node.py           # RL environment node (action step & reward calculation)
+│   ├── lidar_state.py               # 5-zone LiDAR state classifier
+│   ├── reward_calculator.py         # Multi-factor reward function (v, w, a_lin, a_ang)
+│   └── plot_training.py             # Script to visualize RL training rewards
+├── worlds/
+│   ├── duckietown_city.sdf          # Converted Duckietown city grid (SDF 1.9)
+│   ├── rl_arena.sdf                 # Urban city grid (main RL training arena)
+│   ├── road_world.sdf               # Road with slope, speed bumps, and obstacles
+│   ├── obstacle_world.sdf           # Minimal 20x20m obstacle arena
+│   └── city_world.sdf               # High-fidelity urban city environment
+├── README.md                        # Project documentation & setup instructions
+└── SETUP.md                         # Detailed environment setup notes
+```
