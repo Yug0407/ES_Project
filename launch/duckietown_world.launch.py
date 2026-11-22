@@ -34,10 +34,10 @@ from launch_ros.substitutions import FindPackageShare
 
 # ---- Robot spawn position in the Duckietown city ----
 # (0,0) is the centre / spawn marker.
-# The main east-west road runs at y=3, y=9, y=15.
-# Place the robot on the road by setting y_pose to one of those values.
-DEFAULT_X = '0.0'
-DEFAULT_Y = '0.0'
+# Scaled by 0.2: main east-west road center is at y = 0.6
+# Placing robot on the road: x = -0.9, y = 0.6
+DEFAULT_X = '-0.9'
+DEFAULT_Y = '0.6'
 # Note: spawn_turtlebot3.launch.py only accepts x_pose / y_pose.
 # The robot keeps the default heading defined in the waffle_pi model.sdf.
 

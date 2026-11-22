@@ -1,63 +1,26 @@
-<?xml version="1.0" ?>
-<!--
-  duckietown_city.sdf
-  =====================================================================
-  Duckietown-style city grid world for Gazebo Harmonic (SDFormat 1.9).
-
-  Ported from theconstructcore/riabot (Bitbucket) duckietown_gazebo package.
-  Original world: duckietown_gazebo/worlds/main.world (SDF 1.5, classic Gazebo).
-
-  Textures live in:
-    ../models/duckietown_models/<model>/materials/textures/<file>.png
-
-  The world is laid out on approximately a 40x25 m grid centred around
-  the origin.  The TurtleBot3 spawns at (0, 0, 0.05) by default (same
-  convention as the other ES_Project worlds).
-
-  Usage (bare Gazebo, no ROS2):
-      gz sim -r worlds/duckietown_city.sdf
-
-  Usage (ROS2 + TurtleBot3):
-      ros2 launch launch/duckietown_world.launch.py
-
-  Usage (road_world_robot with world override):
-      ros2 launch launch/road_world_robot.launch.py \
-        world_file:=$(pwd)/worlds/duckietown_city.sdf
-  =====================================================================
--->
+<?xml version='1.0' encoding='utf-8'?>
 <sdf version="1.9">
   <world name="duckietown_city">
 
-    <!-- ============================================================
-         Plugins  (same set used across all ES_Project worlds)
-    ============================================================ -->
-    <plugin filename="gz-sim-physics-system"
-            name="gz::sim::systems::Physics">
+    
+    <gui><camera name="user_camera"><pose>-1.8 0.6 0.9 0 0.45 0</pose><track_visual><name>waffle_pi</name><min_dist>0.5</min_dist><max_dist>1.8</max_dist><static>true</static></track_visual></camera></gui><plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics">
       <engine><filename>gz-physics-dartsim-plugin</filename></engine>
     </plugin>
-    <plugin filename="gz-sim-sensors-system"
-            name="gz::sim::systems::Sensors">
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
-    <plugin filename="gz-sim-user-commands-system"
-            name="gz::sim::systems::UserCommands"/>
-    <plugin filename="gz-sim-scene-broadcaster-system"
-            name="gz::sim::systems::SceneBroadcaster"/>
-    <plugin filename="gz-sim-contact-system"
-            name="gz::sim::systems::Contact"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
 
-    <!-- ============================================================
-         Physics  (1 kHz, ODE solver)
-    ============================================================ -->
+    
     <physics name="ode_1ms" type="ode">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
       <real_time_update_rate>1000</real_time_update_rate>
     </physics>
 
-    <!-- ============================================================
-         Scene  (Ogre2 with shadows)
-    ============================================================ -->
+    
     <scene>
       <ambient>0.4 0.4 0.4 1</ambient>
       <background>0.7 0.7 0.7 1</background>
@@ -65,9 +28,7 @@
       <grid>false</grid>
     </scene>
 
-    <!-- ============================================================
-         Sun  (directional light, no shadows to keep it cheap)
-    ============================================================ -->
+    
     <light name="sun" type="directional">
       <cast_shadows>false</cast_shadows>
       <pose>0 0 10 0 0 0</pose>
@@ -82,9 +43,7 @@
       </attenuation>
     </light>
 
-    <!-- ============================================================
-         Ground plane  (large flat grey surface below the road grid)
-    ============================================================ -->
+    
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
@@ -115,35 +74,20 @@
       </link>
     </model>
 
-    <!-- ==============================================================
-         ROAD GRID  (ported from main.world / main_mod_v2.world)
+    
 
-         Segment types and textures:
-           road_plane   -> road_p.png  (straight, 6x6 m)
-           road_inter   -> road_i.png  (4-way intersection, 6x6 m)
-           road_diag    -> road_d.png  (curved / diagonal, 6x6 m)
-           road_plane_3 -> road3.png   (3-lane straight, 18x6 m)
+    
 
-         All segments are 0.1 m thick boxes raised so their top face
-         sits at z = 0.  The robot drives on z = 0.05 (half-height of
-         the TurtleBot3).
+    
 
-         Texture URIs are relative to the worlds/ directory so Gazebo
-         can resolve them without GZ_SIM_RESOURCE_PATH.
-    ============================================================== -->
-
-    <!-- Helper macro (SDF has no macros; segments are listed explicitly) -->
-
-    <!-- Row 0 (y = 3): horizontal main street -->
-
-    <!-- road_plane_3  [18x6]  central long straight -->
+    
     <model name="road_straight_long_r0">
       <static>true</static>
-      <pose>-4.534 3 0.001 0 0 0</pose>
+      <pose>-0.9068 0.6000 0.0002 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>18 6 0.002</size></box></geometry>
+          <geometry><box><size>3.6000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <specular>0.1 0.1 0.1 1</specular>
@@ -157,14 +101,14 @@
       </link>
     </model>
 
-    <!-- road_inter at west end of row 0 -->
+    
     <model name="road_inter_r0_west">
       <static>true</static>
-      <pose>-16.479 3 0.001 0 0 1.5708</pose>
+      <pose>-3.2958 0.6000 0.0002 0.0 0.0 1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -177,14 +121,14 @@
       </link>
     </model>
 
-    <!-- road_plane at far west end -->
+    
     <model name="road_plane_r0_farwest">
       <static>true</static>
-      <pose>-22.450 3 0.001 0 0 0</pose>
+      <pose>-4.4900 0.6000 0.0002 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -197,14 +141,14 @@
       </link>
     </model>
 
-    <!-- road_diag at east end, row 0 -->
+    
     <model name="road_diag_r0_east">
       <static>true</static>
-      <pose>7.461 3 0.001 0 0 0</pose>
+      <pose>1.4922 0.6000 0.0002 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -217,14 +161,14 @@
       </link>
     </model>
 
-    <!-- road_diag far west, row 0 -->
+    
     <model name="road_diag_r0_farwest">
       <static>true</static>
-      <pose>-28.409 3 0.001 0 0 -1.5708</pose>
+      <pose>-5.6818 0.6000 0.0002 0.0 0.0 -1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -237,16 +181,16 @@
       </link>
     </model>
 
-    <!-- Row 1 (y = 9): middle horizontal street -->
+    
 
-    <!-- road_plane_0: N-S connector at x=-16.478, y=9 -->
+    
     <model name="road_plane_r1_center">
       <static>true</static>
-      <pose>-16.478 9 0.001 0 0 -1.5708</pose>
+      <pose>-3.2956 1.8000 0.0002 0.0 0.0 -1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -259,14 +203,14 @@
       </link>
     </model>
 
-    <!-- road_plane_4: straight at x=1.505, y=9 -->
+    
     <model name="road_plane_r1_east">
       <static>true</static>
-      <pose>1.505 9 0.001 0 0 0</pose>
+      <pose>0.3010 1.8000 0.0002 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -279,14 +223,14 @@
       </link>
     </model>
 
-    <!-- road_diag_0: east diagonal at x=7.474, y=9 -->
+    
     <model name="road_diag_r1_east">
       <static>true</static>
-      <pose>7.474 9 0.001 0 0 1.5708</pose>
+      <pose>1.4948 1.8000 0.0002 0.0 0.0 1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -299,14 +243,14 @@
       </link>
     </model>
 
-    <!-- road_diag_1: diagonal connector at x=-4.598, y=9 -->
+    
     <model name="road_diag_r1_mid">
       <static>true</static>
-      <pose>-4.598 9 0.001 0 0 -1.5708</pose>
+      <pose>-0.9196 1.8000 0.0002 0.0 0.0 -1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -319,14 +263,14 @@
       </link>
     </model>
 
-    <!-- road_plane_5: west side at x=-28.437, y=9 -->
+    
     <model name="road_plane_r1_west">
       <static>true</static>
-      <pose>-28.437 9 0.001 0 0 -1.5708</pose>
+      <pose>-5.6874 1.8000 0.0002 0.0 0.0 -1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -339,16 +283,16 @@
       </link>
     </model>
 
-    <!-- Row 2 (y = 15): top horizontal street -->
+    
 
-    <!-- road_inter_0: intersection at x=-16.497, y=15 -->
+    
     <model name="road_inter_r2_center">
       <static>true</static>
-      <pose>-16.497 15 0.001 0 0 -1.5708</pose>
+      <pose>-3.2994 3.0000 0.0002 0.0 0.0 -1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -361,14 +305,14 @@
       </link>
     </model>
 
-    <!-- road_plane_1: straight at x=-22.470, y=15 -->
+    
     <model name="road_plane_r2_west">
       <static>true</static>
-      <pose>-22.470 15 0.001 0 0 0</pose>
+      <pose>-4.4940 3.0000 0.0002 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -381,14 +325,14 @@
       </link>
     </model>
 
-    <!-- road_plane_2: straight at x=-10.507, y=15 -->
+    
     <model name="road_plane_r2_mid">
       <static>true</static>
-      <pose>-10.507 15 0.001 0 0 0</pose>
+      <pose>-2.1014 3.0000 0.0002 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -401,14 +345,14 @@
       </link>
     </model>
 
-    <!-- road_diag_2: diagonal at x=-4.452, y=15 -->
+    
     <model name="road_diag_r2_mid">
       <static>true</static>
-      <pose>-4.452 15 0.001 0 0 1.5708</pose>
+      <pose>-0.8904 3.0000 0.0002 0.0 0.0 1.5708</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -421,14 +365,14 @@
       </link>
     </model>
 
-    <!-- road_diag_3: diagonal at x=-28.436, y=15 -->
+    
     <model name="road_diag_r2_west">
       <static>true</static>
-      <pose>-28.436 15 0.001 0 0 -3.14159</pose>
+      <pose>-5.6872 3.0000 0.0002 0.0 0.0 -3.14159</pose>
       <link name="link">
         <visual name="vis">
           <cast_shadows>false</cast_shadows>
-          <geometry><box><size>6 6 0.002</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
             <pbr>
@@ -441,20 +385,15 @@
       </link>
     </model>
 
-    <!-- ==============================================================
-         BUILDINGS / CITY FURNISHINGS
-         Recreated as simple box primitives since the original meshes
-         reference Gazebo Fuel models not bundled here.
-         Heights and footprints approximate the riabot world.
-    ============================================================== -->
+    
 
-    <!-- Apartment block (west boundary) -->
+    
     <model name="apartment_block">
       <static>true</static>
-      <pose>-33.856 1.443 3.0 0 0 0</pose>
+      <pose>-6.7712 0.2886 0.6000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>8 10 6</size></box></geometry>
+          <geometry><box><size>1.6000 2.0000 1.2000</size></box></geometry>
           <material>
             <ambient>0.55 0.45 0.4 1</ambient>
             <diffuse>0.55 0.45 0.4 1</diffuse>
@@ -463,13 +402,13 @@
       </link>
     </model>
 
-    <!-- House 1 (north-west area) -->
+    
     <model name="house_1">
       <static>true</static>
-      <pose>-22.346 24.172 2.0 0 0 0</pose>
+      <pose>-4.4692 4.8344 0.4000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>6 6 4</size></box></geometry>
+          <geometry><box><size>1.2000 1.2000 0.8000</size></box></geometry>
           <material>
             <ambient>0.8 0.7 0.6 1</ambient>
             <diffuse>0.8 0.7 0.6 1</diffuse>
@@ -478,13 +417,13 @@
       </link>
     </model>
 
-    <!-- House 2 -->
+    
     <model name="house_2">
       <static>true</static>
-      <pose>-7.0 22.0 2.0 0 0 0</pose>
+      <pose>-1.4000 4.4000 0.4000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>5 5 4</size></box></geometry>
+          <geometry><box><size>1.0000 1.0000 0.8000</size></box></geometry>
           <material>
             <ambient>0.7 0.75 0.65 1</ambient>
             <diffuse>0.7 0.75 0.65 1</diffuse>
@@ -493,13 +432,13 @@
       </link>
     </model>
 
-    <!-- House 3 (east side) -->
+    
     <model name="house_3">
       <static>true</static>
-      <pose>7.0 14.568 2.0 0 0 0</pose>
+      <pose>1.4000 2.9136 0.4000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>5 5 4</size></box></geometry>
+          <geometry><box><size>1.0000 1.0000 0.8000</size></box></geometry>
           <material>
             <ambient>0.85 0.75 0.6 1</ambient>
             <diffuse>0.85 0.75 0.6 1</diffuse>
@@ -508,13 +447,13 @@
       </link>
     </model>
 
-    <!-- Gas station (south-east) -->
+    
     <model name="gas_station">
       <static>true</static>
-      <pose>-13.145 -12.439 1.5 0 0 1.572</pose>
+      <pose>-2.6290 -2.4878 0.3000 0.0 0.0 1.572</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>7 10 3</size></box></geometry>
+          <geometry><box><size>1.4000 2.0000 0.6000</size></box></geometry>
           <material>
             <ambient>0.9 0.9 0.3 1</ambient>
             <diffuse>0.9 0.9 0.3 1</diffuse>
@@ -523,13 +462,13 @@
       </link>
     </model>
 
-    <!-- Fast food building -->
+    
     <model name="fast_food">
       <static>true</static>
-      <pose>-24.118 -3.533 2.0 0 0 0</pose>
+      <pose>-4.8236 -0.7066 0.4000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>6 5 4</size></box></geometry>
+          <geometry><box><size>1.2000 1.0000 0.8000</size></box></geometry>
           <material>
             <ambient>0.9 0.3 0.3 1</ambient>
             <diffuse>0.9 0.3 0.3 1</diffuse>
@@ -538,16 +477,14 @@
       </link>
     </model>
 
-    <!-- ==============================================================
-         LAMP POSTS  (9 posts matching original positions)
-    ============================================================== -->
+    
 
     <model name="lamp_post_0">
       <static>true</static>
-      <pose>-23.0 18.0 2.5 0 0 0</pose>
+      <pose>-4.6000 3.6000 0.5000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -555,10 +492,10 @@
 
     <model name="lamp_post_1">
       <static>true</static>
-      <pose>-11.0 18.0 2.5 0 0 0</pose>
+      <pose>-2.2000 3.6000 0.5000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -566,10 +503,10 @@
 
     <model name="lamp_post_2">
       <static>true</static>
-      <pose>4.0 12.0 2.5 0 0 0</pose>
+      <pose>0.8000 2.4000 0.5000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -577,10 +514,10 @@
 
     <model name="lamp_post_3">
       <static>true</static>
-      <pose>-22.0 0.0 2.5 0 0 0</pose>
+      <pose>-4.4000 0.0000 0.5000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -588,10 +525,10 @@
 
     <model name="lamp_post_4">
       <static>true</static>
-      <pose>-10.457 0.0 2.5 0 0 0</pose>
+      <pose>-2.0914 0.0000 0.5000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -599,10 +536,10 @@
 
     <model name="lamp_post_5">
       <static>true</static>
-      <pose>1.0 0.0 2.5 0 0 0</pose>
+      <pose>0.2000 0.0000 0.5000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -610,10 +547,10 @@
 
     <model name="lamp_post_6">
       <static>true</static>
-      <pose>-31.407 7.727 2.5 0 0 1.5708</pose>
+      <pose>-6.2814 1.5454 0.5000 0.0 0.0 1.5708</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -621,10 +558,10 @@
 
     <model name="lamp_post_7">
       <static>true</static>
-      <pose>10.510 6.0 2.5 0 0 -1.612</pose>
+      <pose>2.1020 1.2000 0.5000 0.0 0.0 -1.612</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -632,10 +569,10 @@
 
     <model name="lamp_post_8">
       <static>true</static>
-      <pose>-19.473 9.0 2.5 0 0 1.552</pose>
+      <pose>-3.8946 1.8000 0.5000 0.0 0.0 1.552</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
@@ -643,90 +580,85 @@
 
     <model name="lamp_post_9">
       <static>true</static>
-      <pose>-7.517 9.0 2.5 0 0 1.560</pose>
+      <pose>-1.5034 1.8000 0.5000 0.0 0.0 1.56</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.05</radius><length>5.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- ==============================================================
-         TRAFFIC LIGHTS (Semaforos)
-         Two traffic-light poles as simple boxes with coloured indicator
-    ============================================================== -->
+    
 
-    <!-- Semaforo North (x=-16, y=3) -->
+    
     <model name="traffic_light_north">
       <static>true</static>
-      <pose>-16.0 3.0 0 0 0 1.602</pose>
+      <pose>-3.2000 0.6000 0.0000 0.0 0.0 1.602</pose>
       <link name="link">
-        <!-- Pole -->
+        
         <visual name="pole">
-          <pose>0 0 1.5 0 0 0</pose>
-          <geometry><cylinder><radius>0.04</radius><length>3.0</length></cylinder></geometry>
+          <pose>0.0000 0.0000 0.3000 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0080</radius><length>0.6000</length></cylinder></geometry>
           <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
-        <!-- Housing -->
+        
         <visual name="housing">
-          <pose>0 0 3.2 0 0 0</pose>
-          <geometry><box><size>0.2 0.2 0.6</size></box></geometry>
+          <pose>0.0000 0.0000 0.6400 0.0 0.0 0.0</pose>
+          <geometry><box><size>0.0400 0.0400 0.1200</size></box></geometry>
           <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
         </visual>
-        <!-- Red light -->
+        
         <visual name="red_light">
-          <pose>0 0.13 3.4 0 0 0</pose>
+          <pose>0.0000 0.0260 0.6800 0.0 0.0 0.0</pose>
           <geometry><sphere><radius>0.08</radius></sphere></geometry>
           <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
         </visual>
-        <!-- Green light -->
+        
         <visual name="green_light">
-          <pose>0 0.13 3.1 0 0 0</pose>
+          <pose>0.0000 0.0260 0.6200 0.0 0.0 0.0</pose>
           <geometry><sphere><radius>0.08</radius></sphere></geometry>
           <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.1 0.8 0.1 1</diffuse></material>
         </visual>
         </link>
     </model>
 
-    <!-- Semaforo South (x=-16, y=15) -->
+    
     <model name="traffic_light_south">
       <static>true</static>
-      <pose>-16.0 15.0 0 0 0 1.602</pose>
+      <pose>-3.2000 3.0000 0.0000 0.0 0.0 1.602</pose>
       <link name="link">
         <visual name="pole">
-          <pose>0 0 1.5 0 0 0</pose>
-          <geometry><cylinder><radius>0.04</radius><length>3.0</length></cylinder></geometry>
+          <pose>0.0000 0.0000 0.3000 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0080</radius><length>0.6000</length></cylinder></geometry>
           <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
         </visual>
         <visual name="housing">
-          <pose>0 0 3.2 0 0 0</pose>
-          <geometry><box><size>0.2 0.2 0.6</size></box></geometry>
+          <pose>0.0000 0.0000 0.6400 0.0 0.0 0.0</pose>
+          <geometry><box><size>0.0400 0.0400 0.1200</size></box></geometry>
           <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
         </visual>
         <visual name="red_light">
-          <pose>0 0.13 3.4 0 0 0</pose>
+          <pose>0.0000 0.0260 0.6800 0.0 0.0 0.0</pose>
           <geometry><sphere><radius>0.08</radius></sphere></geometry>
           <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
         </visual>
         <visual name="green_light">
-          <pose>0 0.13 3.1 0 0 0</pose>
+          <pose>0.0000 0.0260 0.6200 0.0 0.0 0.0</pose>
           <geometry><sphere><radius>0.08</radius></sphere></geometry>
           <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.1 0.8 0.1 1</diffuse></material>
         </visual>
         </link>
     </model>
 
-    <!-- ==============================================================
-         JERSEY BARRIERS  (road boundaries / dividers)
-    ============================================================== -->
+    
 
     <model name="jersey_barrier_0">
       <static>true</static>
-      <pose>-5.441 6.0 0.4 0 0 0</pose>
+      <pose>-1.0882 1.2000 0.0800 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>1.5 0.5 0.8</size></box></geometry>
+          <geometry><box><size>0.3000 0.1000 0.1600</size></box></geometry>
           <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
         </visual>
       </link>
@@ -734,10 +666,10 @@
 
     <model name="jersey_barrier_1">
       <static>true</static>
-      <pose>-2.0 6.0 0.4 0 0 0</pose>
+      <pose>-0.4000 1.2000 0.0800 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>1.5 0.5 0.8</size></box></geometry>
+          <geometry><box><size>0.3000 0.1000 0.1600</size></box></geometry>
           <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
         </visual>
       </link>
@@ -745,53 +677,49 @@
 
     <model name="jersey_barrier_2">
       <static>true</static>
-      <pose>2.0 6.0 0.4 0 0 0</pose>
+      <pose>0.4000 1.2000 0.0800 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><box><size>1.5 0.5 0.8</size></box></geometry>
+          <geometry><box><size>0.3000 0.1000 0.1600</size></box></geometry>
           <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- ==============================================================
-         SPEED LIMIT SIGN
-    ============================================================== -->
+    
 
     <model name="speed_limit_sign">
       <static>true</static>
-      <pose>2.0 12.0 0.0 0 0 -1.585</pose>
+      <pose>0.4000 2.4000 0.0000 0.0 0.0 -1.585</pose>
       <link name="link">
-        <!-- Post -->
+        
         <visual name="post">
-          <pose>0 0 0.6 0 0 0</pose>
-          <geometry><cylinder><radius>0.03</radius><length>1.2</length></cylinder></geometry>
+          <pose>0.0000 0.0000 0.1200 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0060</radius><length>0.2400</length></cylinder></geometry>
           <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
         </visual>
-        <!-- Sign face -->
+        
         <visual name="sign_face">
-          <pose>0 0 1.3 0 0 0</pose>
-          <geometry><cylinder><radius>0.15</radius><length>0.02</length></cylinder></geometry>
+          <pose>0.0000 0.0000 0.2600 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0300</radius><length>0.0040</length></cylinder></geometry>
           <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
         </visual>
-        <!-- Red ring -->
+        
         <visual name="red_ring">
-          <pose>0 0 1.31 0 0 0</pose>
-          <geometry><cylinder><radius>0.15</radius><length>0.005</length></cylinder></geometry>
+          <pose>0.0000 0.0000 0.2620 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0300</radius><length>0.0010</length></cylinder></geometry>
           <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
         </visual>
         </link>
     </model>
 
-    <!-- ==============================================================
-         ROBOT SPAWN MARKER  (thin disc so the user can see start)
-    ============================================================== -->
+    
     <model name="spawn_marker">
       <static>true</static>
-      <pose>0.0 0.0 0.001 0 0 0</pose>
+      <pose>0.0000 0.0000 0.0002 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
-          <geometry><cylinder><radius>0.3</radius><length>0.002</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.0600</radius><length>0.0004</length></cylinder></geometry>
           <material>
             <ambient>0.0 0.8 0.0 0.8</ambient>
             <diffuse>0.0 0.8 0.0 0.8</diffuse>
@@ -800,5 +728,201 @@
       </link>
     </model>
 
-  </world>
+  <model name="traffic_car_blue">
+      <static>false</static>
+      <pose>0.8 0.38 0.05 0 0 0</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="col">
+          <pose>0 0 0.06 0 0 0</pose>
+          <geometry><box><size>0.48 0.24 0.12</size></box></geometry>
+        </collision>
+        <visual name="body">
+          <pose>0 0 0.045 0 0 0</pose>
+          <geometry><box><size>0.48 0.24 0.065</size></box></geometry>
+          <material>
+            <ambient>0.08 0.35 0.85 1</ambient>
+            <diffuse>0.12 0.45 0.95 1</diffuse>
+            <specular>0.7 0.7 0.8 1</specular>
+          </material>
+        </visual>
+        <visual name="cabin">
+          <pose>-0.03 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.26 0.20 0.05</size></box></geometry>
+          <material>
+            <ambient>0.05 0.08 0.15 0.95</ambient>
+            <diffuse>0.08 0.12 0.22 0.95</diffuse>
+          </material>
+        </visual>
+        <visual name="hl_l"><pose>0.245 0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient><diffuse>1 1 0.8 1</diffuse></material></visual>
+        <visual name="hl_r"><pose>0.245 -0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient><diffuse>1 1 0.8 1</diffuse></material></visual>
+        <visual name="tl_l"><pose>-0.245 0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.95 0.05 0.05 1</diffuse></material></visual>
+        <visual name="tl_r"><pose>-0.245 -0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.95 0.05 0.05 1</diffuse></material></visual>
+        <visual name="w_fl"><pose>0.14 0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="w_fr"><pose>0.14 -0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="w_rl"><pose>-0.14 0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="w_rr"><pose>-0.14 -0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+      </link>
+      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>50</force>
+        <torque>30</torque>
+        <waypoints>
+          <waypoint>0.8 0.38</waypoint>
+          <waypoint>-2.6 0.38</waypoint>
+        </waypoints>
+      </plugin>
+    </model><model name="traffic_suv_red">
+      <static>false</static>
+      <pose>-3.0 3.0 0.05 0 0 0</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="col">
+          <pose>0 0 0.08 0 0 0</pose>
+          <geometry><box><size>0.46 0.23 0.15</size></box></geometry>
+        </collision>
+        <visual name="body">
+          <pose>0 0 0.05 0 0 0</pose>
+          <geometry><box><size>0.46 0.23 0.07</size></box></geometry>
+          <material><ambient>0.85 0.15 0.1 1</ambient><diffuse>0.95 0.2 0.15 1</diffuse></material>
+        </visual>
+        <visual name="cabin">
+          <pose>-0.02 0 0.11 0 0 0</pose>
+          <geometry><box><size>0.28 0.21 0.065</size></box></geometry>
+          <material><ambient>0.1 0.1 0.12 0.95</ambient><diffuse>0.15 0.15 0.2 0.95</diffuse></material>
+        </visual>
+        <visual name="hl_l"><pose>0.235 0.075 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient></material></visual>
+        <visual name="hl_r"><pose>0.235 -0.075 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient></material></visual>
+        <visual name="w_fl"><pose>0.13 0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="w_fr"><pose>0.13 -0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="w_rl"><pose>-0.13 0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="w_rr"><pose>-0.13 -0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+      </link>
+      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>50</force>
+        <torque>30</torque>
+        <waypoints>
+          <waypoint>-3.0 3.0</waypoint>
+          <waypoint>-1.2 3.0</waypoint>
+        </waypoints>
+      </plugin>
+    </model><model name="pedestrian_crossing">
+      <static>false</static>
+      <pose>-2.2 0.15 0.03 0 0 0</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="col">
+          <pose>0 0 0.18 0 0 0</pose>
+          <geometry><cylinder><radius>0.065</radius><length>0.34</length></cylinder></geometry>
+        </collision>
+        <visual name="legs">
+          <pose>0 0 0.08 0 0 0</pose>
+          <geometry><cylinder><radius>0.045</radius><length>0.14</length></cylinder></geometry>
+          <material><ambient>0.1 0.18 0.35 1</ambient><diffuse>0.15 0.25 0.45 1</diffuse></material>
+        </visual>
+        <visual name="torso">
+          <pose>0 0 0.20 0 0 0</pose>
+          <geometry><cylinder><radius>0.055</radius><length>0.12</length></cylinder></geometry>
+          <material><ambient>0.15 0.6 0.25 1</ambient><diffuse>0.2 0.7 0.3 1</diffuse></material>
+        </visual>
+        <visual name="head">
+          <pose>0 0 0.29 0 0 0</pose>
+          <geometry><sphere><radius>0.042</radius></sphere></geometry>
+          <material><ambient>0.9 0.7 0.55 1</ambient><diffuse>0.95 0.75 0.6 1</diffuse></material>
+        </visual>
+        <visual name="cap">
+          <pose>0 0 0.325 0 0 0</pose>
+          <geometry><cylinder><radius>0.045</radius><length>0.016</length></cylinder></geometry>
+          <material><ambient>0.8 0.2 0.1 1</ambient><diffuse>0.9 0.25 0.15 1</diffuse></material>
+        </visual>
+      </link>
+      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>30</force>
+        <torque>15</torque>
+        <waypoints>
+          <waypoint>-2.2 0.15</waypoint>
+          <waypoint>-2.2 1.05</waypoint>
+        </waypoints>
+      </plugin>
+    </model><model name="pedestrian_sidewalk">
+      <static>false</static>
+      <pose>-3.29 1.0 0.03 0 0 0</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="col">
+          <pose>0 0 0.18 0 0 0</pose>
+          <geometry><cylinder><radius>0.065</radius><length>0.34</length></cylinder></geometry>
+        </collision>
+        <visual name="legs">
+          <pose>0 0 0.08 0 0 0</pose>
+          <geometry><cylinder><radius>0.045</radius><length>0.14</length></cylinder></geometry>
+          <material><ambient>0.1 0.1 0.15 1</ambient><diffuse>0.15 0.15 0.2 1</diffuse></material>
+        </visual>
+        <visual name="torso">
+          <pose>0 0 0.20 0 0 0</pose>
+          <geometry><cylinder><radius>0.055</radius><length>0.12</length></cylinder></geometry>
+          <material><ambient>0.8 0.4 0.1 1</ambient><diffuse>0.9 0.45 0.15 1</diffuse></material>
+        </visual>
+        <visual name="head">
+          <pose>0 0 0.29 0 0 0</pose>
+          <geometry><sphere><radius>0.042</radius></sphere></geometry>
+          <material><ambient>0.9 0.7 0.55 1</ambient><diffuse>0.95 0.75 0.6 1</diffuse></material>
+        </visual>
+      </link>
+      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>30</force>
+        <torque>15</torque>
+        <waypoints>
+          <waypoint>-3.29 1.0</waypoint>
+          <waypoint>-3.29 2.4</waypoint>
+        </waypoints>
+      </plugin>
+    </model><model name="traffic_taxi_yellow">
+      <static>false</static>
+      <pose>0.3 1.8 0.05 0 0 0</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="col">
+          <pose>0 0 0.07 0 0 0</pose>
+          <geometry><box><size>0.44 0.22 0.13</size></box></geometry>
+        </collision>
+        <visual name="body">
+          <pose>0 0 0.045 0 0 0</pose>
+          <geometry><box><size>0.44 0.22 0.07</size></box></geometry>
+          <material><ambient>0.9 0.75 0.05 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material>
+        </visual>
+        <visual name="cabin">
+          <pose>-0.02 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.24 0.19 0.055</size></box></geometry>
+          <material><ambient>0.1 0.1 0.15 0.95</ambient><diffuse>0.15 0.15 0.2 0.95</diffuse></material>
+        </visual>
+        <visual name="taxi_sign">
+          <pose>0 0 0.14 0 0 0</pose>
+          <geometry><box><size>0.08 0.04 0.025</size></box></geometry>
+          <material><ambient>1 1 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material>
+        </visual>
+      </link>
+      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>50</force>
+        <torque>30</torque>
+        <waypoints>
+          <waypoint>0.3 1.8</waypoint>
+          <waypoint>1.5 1.8</waypoint>
+        </waypoints>
+      </plugin>
+    </model></world>
 </sdf>

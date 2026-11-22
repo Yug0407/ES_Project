@@ -2,6 +2,19 @@
 <sdf version="1.9">
   <world name="rl_arena">
 
+    <gui>
+      <camera name="user_camera">
+        <!-- Spawn near robot starting point, zoomed in closely -->
+        <pose>-10.5 -10.5 2.0 0 0.45 0.75</pose>
+        <track_visual>
+          <name>waffle_pi</name>
+          <min_dist>0.8</min_dist>
+          <max_dist>3.0</max_dist>
+          <static>true</static>
+        </track_visual>
+      </camera>
+    </gui>
+
     <!-- ========================================================== -->
     <!-- 1. Physics Engine Settings (ODE, 1ms step size, 1000 Hz)   -->
     <!-- ========================================================== -->
