@@ -1,0 +1,830 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <world name="duckietown_city">
+
+    
+    <gui><camera name="user_camera"><pose>-1.8 0.6 0.9 0 0.45 0</pose><track_visual><name>waffle_pi</name><min_dist>0.5</min_dist><max_dist>1.8</max_dist><static>true</static></track_visual></camera></gui><plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics">
+      <engine><filename>gz-physics-dartsim-plugin</filename></engine>
+    </plugin>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
+
+    
+    <physics name="ode_1ms" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>true</shadows>
+      <grid>false</grid>
+    </scene>
+
+    
+    <light name="sun" type="directional">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+    </light>
+
+    
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction><ode><mu>100</mu><mu2>50</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+
+    
+
+    
+
+    
+    <model name="road_straight_long_r0">
+      <static>true</static>
+      <pose>-0.9068 0.6000 0.0002 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>3.6000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane_3/materials/textures/road3.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_inter_r0_west">
+      <static>true</static>
+      <pose>-3.2958 0.6000 0.0002 0.0 0.0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_inter/materials/textures/road_i.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_plane_r0_farwest">
+      <static>true</static>
+      <pose>-4.4900 0.6000 0.0002 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_diag_r0_east">
+      <static>true</static>
+      <pose>1.4922 0.6000 0.0002 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_diag_r0_farwest">
+      <static>true</static>
+      <pose>-5.6818 0.6000 0.0002 0.0 0.0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+
+    
+    <model name="road_plane_r1_center">
+      <static>true</static>
+      <pose>-3.2956 1.8000 0.0002 0.0 0.0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_plane_r1_east">
+      <static>true</static>
+      <pose>0.3010 1.8000 0.0002 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_diag_r1_east">
+      <static>true</static>
+      <pose>1.4948 1.8000 0.0002 0.0 0.0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_diag_r1_mid">
+      <static>true</static>
+      <pose>-0.9196 1.8000 0.0002 0.0 0.0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_plane_r1_west">
+      <static>true</static>
+      <pose>-5.6874 1.8000 0.0002 0.0 0.0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+
+    
+    <model name="road_inter_r2_center">
+      <static>true</static>
+      <pose>-3.2994 3.0000 0.0002 0.0 0.0 -1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_inter/materials/textures/road_i.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_plane_r2_west">
+      <static>true</static>
+      <pose>-4.4940 3.0000 0.0002 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_plane_r2_mid">
+      <static>true</static>
+      <pose>-2.1014 3.0000 0.0002 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_plane/materials/textures/road_p.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_diag_r2_mid">
+      <static>true</static>
+      <pose>-0.8904 3.0000 0.0002 0.0 0.0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="road_diag_r2_west">
+      <static>true</static>
+      <pose>-5.6872 3.0000 0.0002 0.0 0.0 -3.14159</pose>
+      <link name="link">
+        <visual name="vis">
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>1.2000 1.2000 0.0020</size></box></geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>../models/duckietown_models/road_diag/materials/textures/road_d.png</albedo_map>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+
+    
+    <model name="apartment_block">
+      <static>true</static>
+      <pose>-7.4000 0.2886 0.6000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.6000 2.0000 1.2000</size></box></geometry>
+          <material>
+            <ambient>0.55 0.45 0.4 1</ambient>
+            <diffuse>0.55 0.45 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="house_1">
+      <static>true</static>
+      <pose>-4.4692 4.8344 0.4000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.2000 1.2000 0.8000</size></box></geometry>
+          <material>
+            <ambient>0.8 0.7 0.6 1</ambient>
+            <diffuse>0.8 0.7 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="house_2">
+      <static>true</static>
+      <pose>-1.4000 4.4000 0.4000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.0000 1.0000 0.8000</size></box></geometry>
+          <material>
+            <ambient>0.7 0.75 0.65 1</ambient>
+            <diffuse>0.7 0.75 0.65 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="house_3">
+      <static>true</static>
+      <pose>1.4000 2.9136 0.4000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.0000 1.0000 0.8000</size></box></geometry>
+          <material>
+            <ambient>0.85 0.75 0.6 1</ambient>
+            <diffuse>0.85 0.75 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="gas_station">
+      <static>true</static>
+      <pose>-2.6290 -2.4878 0.3000 0.0 0.0 1.572</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.4000 2.0000 0.6000</size></box></geometry>
+          <material>
+            <ambient>0.9 0.9 0.3 1</ambient>
+            <diffuse>0.9 0.9 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+    <model name="fast_food">
+      <static>true</static>
+      <pose>-4.8236 -0.7066 0.4000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>1.2000 1.0000 0.8000</size></box></geometry>
+          <material>
+            <ambient>0.9 0.3 0.3 1</ambient>
+            <diffuse>0.9 0.3 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    
+
+    <model name="lamp_post_0">
+      <static>true</static>
+      <pose>-4.6000 3.6000 0.5000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_1">
+      <static>true</static>
+      <pose>-2.2000 3.6000 0.5000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_2">
+      <static>true</static>
+      <pose>0.8000 2.4000 0.5000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_3">
+      <static>true</static>
+      <pose>-4.4000 0.0000 0.5000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_4">
+      <static>true</static>
+      <pose>-2.0914 0.0000 0.5000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_5">
+      <static>true</static>
+      <pose>0.2000 0.0000 0.5000 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_6">
+      <static>true</static>
+      <pose>-6.2814 1.5454 0.5000 0.0 0.0 1.5708</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_7">
+      <static>true</static>
+      <pose>2.1020 1.2000 0.5000 0.0 0.0 -1.612</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_8">
+      <static>true</static>
+      <pose>-3.8946 1.8000 0.5000 0.0 0.0 1.552</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="lamp_post_9">
+      <static>true</static>
+      <pose>-1.5034 1.8000 0.5000 0.0 0.0 1.56</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0100</radius><length>1.0000</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    
+
+    
+    <model name="traffic_light_north">
+      <static>true</static>
+      <pose>-3.2000 0.6000 0.0000 0.0 0.0 1.602</pose>
+      <link name="link">
+        
+        <visual name="pole">
+          <pose>0.0000 0.0000 0.3000 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0080</radius><length>0.6000</length></cylinder></geometry>
+          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        
+        <visual name="housing">
+          <pose>0.0000 0.0000 0.6400 0.0 0.0 0.0</pose>
+          <geometry><box><size>0.0400 0.0400 0.1200</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+        </visual>
+        
+        <visual name="red_light">
+          <pose>0.0000 0.0260 0.6800 0.0 0.0 0.0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+        
+        <visual name="green_light">
+          <pose>0.0000 0.0260 0.6200 0.0 0.0 0.0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.1 0.8 0.1 1</diffuse></material>
+        </visual>
+        </link>
+    </model>
+
+    
+    <model name="traffic_light_south">
+      <static>true</static>
+      <pose>-3.2000 3.0000 0.0000 0.0 0.0 1.602</pose>
+      <link name="link">
+        <visual name="pole">
+          <pose>0.0000 0.0000 0.3000 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0080</radius><length>0.6000</length></cylinder></geometry>
+          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        <visual name="housing">
+          <pose>0.0000 0.0000 0.6400 0.0 0.0 0.0</pose>
+          <geometry><box><size>0.0400 0.0400 0.1200</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+        </visual>
+        <visual name="red_light">
+          <pose>0.0000 0.0260 0.6800 0.0 0.0 0.0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+        <visual name="green_light">
+          <pose>0.0000 0.0260 0.6200 0.0 0.0 0.0</pose>
+          <geometry><sphere><radius>0.08</radius></sphere></geometry>
+          <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.1 0.8 0.1 1</diffuse></material>
+        </visual>
+        </link>
+    </model>
+
+    
+
+    <model name="jersey_barrier_0">
+      <static>true</static>
+      <pose>-1.0882 1.2000 0.0800 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>0.3000 0.1000 0.1600</size></box></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="jersey_barrier_1">
+      <static>true</static>
+      <pose>-0.4000 1.2000 0.0800 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>0.3000 0.1000 0.1600</size></box></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="jersey_barrier_2">
+      <static>true</static>
+      <pose>0.4000 1.2000 0.0800 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><box><size>0.3000 0.1000 0.1600</size></box></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    
+
+    <model name="speed_limit_sign">
+      <static>true</static>
+      <pose>0.4000 2.4000 0.0000 0.0 0.0 -1.585</pose>
+      <link name="link">
+        
+        <visual name="post">
+          <pose>0.0000 0.0000 0.1200 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0060</radius><length>0.2400</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+        
+        <visual name="sign_face">
+          <pose>0.0000 0.0000 0.2600 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0300</radius><length>0.0040</length></cylinder></geometry>
+          <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse></material>
+        </visual>
+        
+        <visual name="red_ring">
+          <pose>0.0000 0.0000 0.2620 0.0 0.0 0.0</pose>
+          <geometry><cylinder><radius>0.0300</radius><length>0.0010</length></cylinder></geometry>
+          <material><ambient>0.9 0.1 0.1 1</ambient><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+        </link>
+    </model>
+
+    
+    <model name="spawn_marker">
+      <static>true</static>
+      <pose>0.0000 0.0000 0.0002 0.0 0.0 0.0</pose>
+      <link name="link">
+        <visual name="vis">
+          <geometry><cylinder><radius>0.0600</radius><length>0.0004</length></cylinder></geometry>
+          <material>
+            <ambient>0.0 0.8 0.0 0.8</ambient>
+            <diffuse>0.0 0.8 0.0 0.8</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  <model name="npc_car_blue">
+      <static>false</static>
+      <pose>-2.9309 0.3303 0.0040 0 0 -0.2596</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
+        </collision>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.1000 0.3500 0.9000 1.0</ambient><diffuse>0.1000 0.3500 0.9000 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
+      </link>
+    </model><model name="npc_taxi_yellow">
+      <static>false</static>
+      <pose>1.7601 0.9700 0.0040 0 0 1.3123</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
+        </collision>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.9500 0.7800 0.0800 1.0</ambient><diffuse>0.9500 0.7800 0.0800 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="taxi_sign"><pose>-0.04 0 0.215 0 0 0</pose><geometry><box><size>0.10 0.05 0.04</size></box></geometry><material><ambient>1 1 0.3 1.0</ambient><diffuse>1 1 0.3 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual>
+      </link>
+    </model><model name="npc_car_green">
+      <static>false</static>
+      <pose>-1.6364 3.3000 0.0040 0 0 3.1416</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
+        </collision>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.1200 0.6200 0.2500 1.0</ambient><diffuse>0.1200 0.6200 0.2500 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
+      </link>
+    </model><model name="npc_car_red">
+      <static>false</static>
+      <pose>-1.1987 2.3550 0.0040 0 0 -1.5127</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
+        </collision>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.8500 0.1200 0.1000 1.0</ambient><diffuse>0.8500 0.1200 0.1000 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
+      </link>
+    </model><model name="npc_suv_white">
+      <static>false</static>
+      <pose>-0.5364 0.9000 0.0040 0 0 3.1416</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
+        </collision>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.9200 0.9200 0.9200 1.0</ambient><diffuse>0.9200 0.9200 0.9200 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.152 0 0 0</pose><geometry><box><size>0.42 0.26 0.085</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
+      </link>
+    </model><model name="npc_ped_south">
+      <static>false</static>
+      <pose>-4.8900 -0.0800 0.0000 0 0 0.0000</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.15 0 0 0</pose>
+          <geometry><cylinder><radius>0.07</radius><length>0.30</length></cylinder></geometry>
+        </collision>
+        <visual name="legs"><pose>0 0 0.065 0 0 0</pose><geometry><cylinder><radius>0.040</radius><length>0.13</length></cylinder></geometry>
+          <material><ambient>0.10 0.15 0.35 1</ambient><diffuse>0.12 0.20 0.45 1</diffuse></material></visual>
+        <visual name="torso"><pose>0 0 0.185 0 0 0</pose><geometry><cylinder><radius>0.052</radius><length>0.12</length></cylinder></geometry>
+          <material><ambient>0.15 0.6 0.3 1</ambient><diffuse>0.15 0.6 0.3 1</diffuse></material></visual>
+        <visual name="head"><pose>0 0 0.265 0 0 0</pose><geometry><sphere><radius>0.038</radius></sphere></geometry>
+          <material><ambient>0.90 0.70 0.55 1</ambient><diffuse>0.95 0.75 0.60 1</diffuse></material></visual>
+        <visual name="nose"><pose>0.036 0 0.265 0 0 0</pose><geometry><box><size>0.014 0.014 0.014</size></box></geometry>
+          <material><ambient>0.8 0.55 0.4 1</ambient><diffuse>0.8 0.55 0.4 1</diffuse></material></visual>
+      </link>
+    </model><model name="npc_ped_north">
+      <static>false</static>
+      <pose>-3.2000 3.7600 0.0000 0 0 3.1416</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.15 0 0 0</pose>
+          <geometry><cylinder><radius>0.07</radius><length>0.30</length></cylinder></geometry>
+        </collision>
+        <visual name="legs"><pose>0 0 0.065 0 0 0</pose><geometry><cylinder><radius>0.040</radius><length>0.13</length></cylinder></geometry>
+          <material><ambient>0.10 0.15 0.35 1</ambient><diffuse>0.12 0.20 0.45 1</diffuse></material></visual>
+        <visual name="torso"><pose>0 0 0.185 0 0 0</pose><geometry><cylinder><radius>0.052</radius><length>0.12</length></cylinder></geometry>
+          <material><ambient>0.85 0.35 0.15 1</ambient><diffuse>0.85 0.35 0.15 1</diffuse></material></visual>
+        <visual name="head"><pose>0 0 0.265 0 0 0</pose><geometry><sphere><radius>0.038</radius></sphere></geometry>
+          <material><ambient>0.90 0.70 0.55 1</ambient><diffuse>0.95 0.75 0.60 1</diffuse></material></visual>
+        <visual name="nose"><pose>0.036 0 0.265 0 0 0</pose><geometry><box><size>0.014 0.014 0.014</size></box></geometry>
+          <material><ambient>0.8 0.55 0.4 1</ambient><diffuse>0.8 0.55 0.4 1</diffuse></material></visual>
+      </link>
+    </model></world>
+</sdf>

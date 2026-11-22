@@ -74,6 +74,12 @@ def generate_launch_description():
     x_pose = LaunchConfiguration('x_pose')
     y_pose = LaunchConfiguration('y_pose')
 
+    # Optional modern GUI theme (created by: python3 scripts/beautify_city.py --gui)
+    gui_config = os.path.join(project_dir, 'config', 'duckietown_gui.config')
+    gz_args = ['-r ', duckietown_world]
+    if os.path.exists(gui_config):
+        gz_args += [' --gui-config ', gui_config]
+
     # --- Start Gazebo with the Duckietown city world ---
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -83,7 +89,7 @@ def generate_launch_description():
                 'gz_sim.launch.py'
             ])
         ),
-        launch_arguments={'gz_args': ['-r ', duckietown_world]}.items()
+        launch_arguments={'gz_args': gz_args}.items()
     )
 
     # --- Spawn TurtleBot3 ---
@@ -130,12 +136,16 @@ def generate_launch_description():
         )],
     )
 
+    # Spawn the robot a few seconds after Gazebo starts, so the (decorated) world is fully
+    # loaded first. Without the wait the spawn can time out and the robot never appears.
+    spawn_robot_later = TimerAction(period=8.0, actions=[spawn_robot])
+
     return LaunchDescription([
         x_pose_arg,
         y_pose_arg,
         set_resource_path,
         gz_sim,
-        spawn_robot,
+        spawn_robot_later,
         traffic_bridge,
         traffic_controller,
     ])
