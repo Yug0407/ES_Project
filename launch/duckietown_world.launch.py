@@ -13,7 +13,9 @@ Usage (default — Duckietown city):
     ros2 launch launch/duckietown_world.launch.py
 
 Usage (override spawn position):
-    ros2 launch launch/duckietown_world.launch.py x_pose:=-5.0 y_pose:=3.0
+    ros2 launch launch/duckietown_world.launch.py x_pose:=-5.0 y_pose:=0.3
+
+Traffic (cars + pedestrians) is driven by traffic_controller.py, started below.
 
 The robot spawns at (0, 0) — the green disc in the world marks this point.
 To drive on the main road, move it to e.g. x=-4.5, y=3.0 (centre of the
@@ -26,18 +28,21 @@ os.environ['TURTLEBOT3_MODEL'] = 'waffle_pi'
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
+from launch.actions import (DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,
+                            SetEnvironmentVariable, TimerAction)
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
 # ---- Robot spawn position in the Duckietown city ----
 # (0,0) is the centre / spawn marker.
-# Scaled by 0.2: main east-west road center is at y = 0.6
-# Placing robot on the road: x = -0.9, y = 0.6
+# Main east-west road centre line is y = 0.6, lanes are 0.3 m either side.
+# The robot faces east, so its (right-hand) lane is y = 0.3  -> same lane the
+# traffic uses, so cars behind it will slow down and follow it.
 DEFAULT_X = '-0.9'
-DEFAULT_Y = '0.6'
+DEFAULT_Y = '0.3'
 # Note: spawn_turtlebot3.launch.py only accepts x_pose / y_pose.
 # The robot keeps the default heading defined in the waffle_pi model.sdf.
 
@@ -96,10 +101,41 @@ def generate_launch_description():
         }.items()
     )
 
+    # --- Traffic: bridge Gazebo's set_pose service + robot pose into ROS 2 ---
+    world_name = 'duckietown_city'
+    traffic_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='traffic_bridge',
+        output='screen',
+        arguments=[
+            f'/world/{world_name}/set_pose@ros_gz_interfaces/srv/SetEntityPose',
+            f'/world/{world_name}/dynamic_pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
+        ],
+    )
+
+    # --- Traffic: the node that drives the cars and pedestrians ---
+    # Find traffic_controller.py (scripts/ folder or project root)
+    controller_path = next(
+        (p for p in (os.path.join(project_dir, 'scripts', 'traffic_controller.py'),
+                     os.path.join(project_dir, 'traffic_controller.py')) if os.path.exists(p)),
+        None)
+    if controller_path is None:
+        raise RuntimeError('traffic_controller.py not found in scripts/ or the project root')
+    traffic_controller = TimerAction(
+        period=4.0,   # give Gazebo a moment to start
+        actions=[ExecuteProcess(
+            cmd=['python3', controller_path],
+            output='screen',
+        )],
+    )
+
     return LaunchDescription([
         x_pose_arg,
         y_pose_arg,
         set_resource_path,
         gz_sim,
         spawn_robot,
+        traffic_bridge,
+        traffic_controller,
     ])

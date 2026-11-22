@@ -390,7 +390,7 @@
     
     <model name="apartment_block">
       <static>true</static>
-      <pose>-6.7712 0.2886 0.6000 0.0 0.0 0.0</pose>
+      <pose>-7.4000 0.2886 0.6000 0.0 0.0 0.0</pose>
       <link name="link">
         <visual name="vis">
           <geometry><box><size>1.6000 2.0000 1.2000</size></box></geometry>
@@ -728,201 +728,103 @@
       </link>
     </model>
 
-  <model name="traffic_car_blue">
+  <model name="npc_car_blue">
       <static>false</static>
-      <pose>0.8 0.38 0.05 0 0 0</pose>
+      <pose>-2.9309 0.3303 0.0040 0 0 -0.2596</pose>
       <link name="link">
         <kinematic>true</kinematic>
         <gravity>false</gravity>
-        <collision name="col">
-          <pose>0 0 0.06 0 0 0</pose>
-          <geometry><box><size>0.48 0.24 0.12</size></box></geometry>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
         </collision>
-        <visual name="body">
-          <pose>0 0 0.045 0 0 0</pose>
-          <geometry><box><size>0.48 0.24 0.065</size></box></geometry>
-          <material>
-            <ambient>0.08 0.35 0.85 1</ambient>
-            <diffuse>0.12 0.45 0.95 1</diffuse>
-            <specular>0.7 0.7 0.8 1</specular>
-          </material>
-        </visual>
-        <visual name="cabin">
-          <pose>-0.03 0 0.10 0 0 0</pose>
-          <geometry><box><size>0.26 0.20 0.05</size></box></geometry>
-          <material>
-            <ambient>0.05 0.08 0.15 0.95</ambient>
-            <diffuse>0.08 0.12 0.22 0.95</diffuse>
-          </material>
-        </visual>
-        <visual name="hl_l"><pose>0.245 0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient><diffuse>1 1 0.8 1</diffuse></material></visual>
-        <visual name="hl_r"><pose>0.245 -0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient><diffuse>1 1 0.8 1</diffuse></material></visual>
-        <visual name="tl_l"><pose>-0.245 0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.95 0.05 0.05 1</diffuse></material></visual>
-        <visual name="tl_r"><pose>-0.245 -0.08 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.95 0.05 0.05 1</diffuse></material></visual>
-        <visual name="w_fl"><pose>0.14 0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
-        <visual name="w_fr"><pose>0.14 -0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
-        <visual name="w_rl"><pose>-0.14 0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
-        <visual name="w_rr"><pose>-0.14 -0.122 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.1000 0.3500 0.9000 1.0</ambient><diffuse>0.1000 0.3500 0.9000 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
       </link>
-      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>50</force>
-        <torque>30</torque>
-        <waypoints>
-          <waypoint>0.8 0.38</waypoint>
-          <waypoint>-2.6 0.38</waypoint>
-        </waypoints>
-      </plugin>
-    </model><model name="traffic_suv_red">
+    </model><model name="npc_taxi_yellow">
       <static>false</static>
-      <pose>-3.0 3.0 0.05 0 0 0</pose>
+      <pose>1.7601 0.9700 0.0040 0 0 1.3123</pose>
       <link name="link">
         <kinematic>true</kinematic>
         <gravity>false</gravity>
-        <collision name="col">
-          <pose>0 0 0.08 0 0 0</pose>
-          <geometry><box><size>0.46 0.23 0.15</size></box></geometry>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
         </collision>
-        <visual name="body">
-          <pose>0 0 0.05 0 0 0</pose>
-          <geometry><box><size>0.46 0.23 0.07</size></box></geometry>
-          <material><ambient>0.85 0.15 0.1 1</ambient><diffuse>0.95 0.2 0.15 1</diffuse></material>
-        </visual>
-        <visual name="cabin">
-          <pose>-0.02 0 0.11 0 0 0</pose>
-          <geometry><box><size>0.28 0.21 0.065</size></box></geometry>
-          <material><ambient>0.1 0.1 0.12 0.95</ambient><diffuse>0.15 0.15 0.2 0.95</diffuse></material>
-        </visual>
-        <visual name="hl_l"><pose>0.235 0.075 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient></material></visual>
-        <visual name="hl_r"><pose>0.235 -0.075 0.05 0 0 0</pose><geometry><box><size>0.008 0.05 0.025</size></box></geometry><material><ambient>1 1 0.8 1</ambient></material></visual>
-        <visual name="w_fl"><pose>0.13 0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
-        <visual name="w_fr"><pose>0.13 -0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
-        <visual name="w_rl"><pose>-0.13 0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
-        <visual name="w_rr"><pose>-0.13 -0.118 0.025 1.5708 0 0</pose><geometry><cylinder><radius>0.038</radius><length>0.022</length></cylinder></geometry><material><ambient>0.05 0.05 0.05 1</ambient></material></visual>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.9500 0.7800 0.0800 1.0</ambient><diffuse>0.9500 0.7800 0.0800 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="taxi_sign"><pose>-0.04 0 0.215 0 0 0</pose><geometry><box><size>0.10 0.05 0.04</size></box></geometry><material><ambient>1 1 0.3 1.0</ambient><diffuse>1 1 0.3 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual>
       </link>
-      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>50</force>
-        <torque>30</torque>
-        <waypoints>
-          <waypoint>-3.0 3.0</waypoint>
-          <waypoint>-1.2 3.0</waypoint>
-        </waypoints>
-      </plugin>
-    </model><model name="pedestrian_crossing">
+    </model><model name="npc_car_green">
       <static>false</static>
-      <pose>-2.2 0.15 0.03 0 0 0</pose>
+      <pose>-1.6364 3.3000 0.0040 0 0 3.1416</pose>
       <link name="link">
         <kinematic>true</kinematic>
         <gravity>false</gravity>
-        <collision name="col">
-          <pose>0 0 0.18 0 0 0</pose>
-          <geometry><cylinder><radius>0.065</radius><length>0.34</length></cylinder></geometry>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
         </collision>
-        <visual name="legs">
-          <pose>0 0 0.08 0 0 0</pose>
-          <geometry><cylinder><radius>0.045</radius><length>0.14</length></cylinder></geometry>
-          <material><ambient>0.1 0.18 0.35 1</ambient><diffuse>0.15 0.25 0.45 1</diffuse></material>
-        </visual>
-        <visual name="torso">
-          <pose>0 0 0.20 0 0 0</pose>
-          <geometry><cylinder><radius>0.055</radius><length>0.12</length></cylinder></geometry>
-          <material><ambient>0.15 0.6 0.25 1</ambient><diffuse>0.2 0.7 0.3 1</diffuse></material>
-        </visual>
-        <visual name="head">
-          <pose>0 0 0.29 0 0 0</pose>
-          <geometry><sphere><radius>0.042</radius></sphere></geometry>
-          <material><ambient>0.9 0.7 0.55 1</ambient><diffuse>0.95 0.75 0.6 1</diffuse></material>
-        </visual>
-        <visual name="cap">
-          <pose>0 0 0.325 0 0 0</pose>
-          <geometry><cylinder><radius>0.045</radius><length>0.016</length></cylinder></geometry>
-          <material><ambient>0.8 0.2 0.1 1</ambient><diffuse>0.9 0.25 0.15 1</diffuse></material>
-        </visual>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.1200 0.6200 0.2500 1.0</ambient><diffuse>0.1200 0.6200 0.2500 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
       </link>
-      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>30</force>
-        <torque>15</torque>
-        <waypoints>
-          <waypoint>-2.2 0.15</waypoint>
-          <waypoint>-2.2 1.05</waypoint>
-        </waypoints>
-      </plugin>
-    </model><model name="pedestrian_sidewalk">
+    </model><model name="npc_car_red">
       <static>false</static>
-      <pose>-3.29 1.0 0.03 0 0 0</pose>
+      <pose>-1.1987 2.3550 0.0040 0 0 -1.5127</pose>
       <link name="link">
         <kinematic>true</kinematic>
         <gravity>false</gravity>
-        <collision name="col">
-          <pose>0 0 0.18 0 0 0</pose>
-          <geometry><cylinder><radius>0.065</radius><length>0.34</length></cylinder></geometry>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
         </collision>
-        <visual name="legs">
-          <pose>0 0 0.08 0 0 0</pose>
-          <geometry><cylinder><radius>0.045</radius><length>0.14</length></cylinder></geometry>
-          <material><ambient>0.1 0.1 0.15 1</ambient><diffuse>0.15 0.15 0.2 1</diffuse></material>
-        </visual>
-        <visual name="torso">
-          <pose>0 0 0.20 0 0 0</pose>
-          <geometry><cylinder><radius>0.055</radius><length>0.12</length></cylinder></geometry>
-          <material><ambient>0.8 0.4 0.1 1</ambient><diffuse>0.9 0.45 0.15 1</diffuse></material>
-        </visual>
-        <visual name="head">
-          <pose>0 0 0.29 0 0 0</pose>
-          <geometry><sphere><radius>0.042</radius></sphere></geometry>
-          <material><ambient>0.9 0.7 0.55 1</ambient><diffuse>0.95 0.75 0.6 1</diffuse></material>
-        </visual>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.8500 0.1200 0.1000 1.0</ambient><diffuse>0.8500 0.1200 0.1000 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.143 0 0 0</pose><geometry><box><size>0.34 0.26 0.065</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
       </link>
-      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>30</force>
-        <torque>15</torque>
-        <waypoints>
-          <waypoint>-3.29 1.0</waypoint>
-          <waypoint>-3.29 2.4</waypoint>
-        </waypoints>
-      </plugin>
-    </model><model name="traffic_taxi_yellow">
+    </model><model name="npc_suv_white">
       <static>false</static>
-      <pose>0.3 1.8 0.05 0 0 0</pose>
+      <pose>-0.5364 0.9000 0.0040 0 0 3.1416</pose>
       <link name="link">
         <kinematic>true</kinematic>
         <gravity>false</gravity>
-        <collision name="col">
-          <pose>0 0 0.07 0 0 0</pose>
-          <geometry><box><size>0.44 0.22 0.13</size></box></geometry>
+        <collision name="collision">
+          <pose>0 0 0.10 0 0 0</pose>
+          <geometry><box><size>0.62 0.30 0.16</size></box></geometry>
         </collision>
-        <visual name="body">
-          <pose>0 0 0.045 0 0 0</pose>
-          <geometry><box><size>0.44 0.22 0.07</size></box></geometry>
-          <material><ambient>0.9 0.75 0.05 1</ambient><diffuse>0.95 0.8 0.1 1</diffuse></material>
-        </visual>
-        <visual name="cabin">
-          <pose>-0.02 0 0.10 0 0 0</pose>
-          <geometry><box><size>0.24 0.19 0.055</size></box></geometry>
-          <material><ambient>0.1 0.1 0.15 0.95</ambient><diffuse>0.15 0.15 0.2 0.95</diffuse></material>
-        </visual>
-        <visual name="taxi_sign">
-          <pose>0 0 0.14 0 0 0</pose>
-          <geometry><box><size>0.08 0.04 0.025</size></box></geometry>
-          <material><ambient>1 1 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material>
-        </visual>
+        <visual name="body"><pose>0 0 0.075 0 0 0</pose><geometry><box><size>0.62 0.30 0.07</size></box></geometry><material><ambient>0.9200 0.9200 0.9200 1.0</ambient><diffuse>0.9200 0.9200 0.9200 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="cabin"><pose>-0.04 0 0.152 0 0 0</pose><geometry><box><size>0.42 0.26 0.085</size></box></geometry><material><ambient>0.08 0.1 0.14 0.95</ambient><diffuse>0.08 0.1 0.14 0.95</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_l"><pose>0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="headlight_r"><pose>0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>1 1 0.8 1.0</ambient><diffuse>1 1 0.8 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_l"><pose>-0.311 0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="taillight_r"><pose>-0.311 -0.095 0.080 0 0 0</pose><geometry><box><size>0.01 0.06 0.03</size></box></geometry><material><ambient>0.9 0.05 0.05 1.0</ambient><diffuse>0.9 0.05 0.05 1.0</diffuse><specular>0.3 0.3 0.3 1</specular></material></visual><visual name="w_fl"><pose>0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_fr"><pose>0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rl"><pose>-0.2 0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual><visual name="w_rr"><pose>-0.2 -0.15 0.045 1.5708 0 0</pose><geometry><cylinder><radius>0.045</radius><length>0.035</length></cylinder></geometry><material><ambient>0.04 0.04 0.04 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse></material></visual>
       </link>
-      <plugin filename="gz-sim-trajectory-follower-system" name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>50</force>
-        <torque>30</torque>
-        <waypoints>
-          <waypoint>0.3 1.8</waypoint>
-          <waypoint>1.5 1.8</waypoint>
-        </waypoints>
-      </plugin>
+    </model><model name="npc_ped_south">
+      <static>false</static>
+      <pose>-4.8900 -0.0800 0.0000 0 0 0.0000</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.15 0 0 0</pose>
+          <geometry><cylinder><radius>0.07</radius><length>0.30</length></cylinder></geometry>
+        </collision>
+        <visual name="legs"><pose>0 0 0.065 0 0 0</pose><geometry><cylinder><radius>0.040</radius><length>0.13</length></cylinder></geometry>
+          <material><ambient>0.10 0.15 0.35 1</ambient><diffuse>0.12 0.20 0.45 1</diffuse></material></visual>
+        <visual name="torso"><pose>0 0 0.185 0 0 0</pose><geometry><cylinder><radius>0.052</radius><length>0.12</length></cylinder></geometry>
+          <material><ambient>0.15 0.6 0.3 1</ambient><diffuse>0.15 0.6 0.3 1</diffuse></material></visual>
+        <visual name="head"><pose>0 0 0.265 0 0 0</pose><geometry><sphere><radius>0.038</radius></sphere></geometry>
+          <material><ambient>0.90 0.70 0.55 1</ambient><diffuse>0.95 0.75 0.60 1</diffuse></material></visual>
+        <visual name="nose"><pose>0.036 0 0.265 0 0 0</pose><geometry><box><size>0.014 0.014 0.014</size></box></geometry>
+          <material><ambient>0.8 0.55 0.4 1</ambient><diffuse>0.8 0.55 0.4 1</diffuse></material></visual>
+      </link>
+    </model><model name="npc_ped_north">
+      <static>false</static>
+      <pose>-3.2000 3.7600 0.0000 0 0 3.1416</pose>
+      <link name="link">
+        <kinematic>true</kinematic>
+        <gravity>false</gravity>
+        <collision name="collision">
+          <pose>0 0 0.15 0 0 0</pose>
+          <geometry><cylinder><radius>0.07</radius><length>0.30</length></cylinder></geometry>
+        </collision>
+        <visual name="legs"><pose>0 0 0.065 0 0 0</pose><geometry><cylinder><radius>0.040</radius><length>0.13</length></cylinder></geometry>
+          <material><ambient>0.10 0.15 0.35 1</ambient><diffuse>0.12 0.20 0.45 1</diffuse></material></visual>
+        <visual name="torso"><pose>0 0 0.185 0 0 0</pose><geometry><cylinder><radius>0.052</radius><length>0.12</length></cylinder></geometry>
+          <material><ambient>0.85 0.35 0.15 1</ambient><diffuse>0.85 0.35 0.15 1</diffuse></material></visual>
+        <visual name="head"><pose>0 0 0.265 0 0 0</pose><geometry><sphere><radius>0.038</radius></sphere></geometry>
+          <material><ambient>0.90 0.70 0.55 1</ambient><diffuse>0.95 0.75 0.60 1</diffuse></material></visual>
+        <visual name="nose"><pose>0.036 0 0.265 0 0 0</pose><geometry><box><size>0.014 0.014 0.014</size></box></geometry>
+          <material><ambient>0.8 0.55 0.4 1</ambient><diffuse>0.8 0.55 0.4 1</diffuse></material></visual>
+      </link>
     </model></world>
 </sdf>
