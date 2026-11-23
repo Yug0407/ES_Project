@@ -41,7 +41,7 @@ from launch_ros.substitutions import FindPackageShare
 # Main east-west road centre line is y = 0.6, lanes are 0.3 m either side.
 # The robot faces east, so its (right-hand) lane is y = 0.3  -> same lane the
 # traffic uses, so cars behind it will slow down and follow it.
-DEFAULT_X = '-0.9'
+DEFAULT_X = '0.60'
 DEFAULT_Y = '0.3'
 # Note: spawn_turtlebot3.launch.py only accepts x_pose / y_pose.
 # The robot keeps the default heading defined in the waffle_pi model.sdf.
