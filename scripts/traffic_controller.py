@@ -19,6 +19,8 @@ import rclpy
 from rclpy.node import Node
 from rosgraph_msgs.msg import Clock
 from tf2_msgs.msg import TFMessage
+from gz.transport13 import Node as GzNode
+from gz.msgs10.pose_v_pb2 import Pose_V
 try:
     from ros_gz_interfaces.srv import SetEntityPose
     from ros_gz_interfaces.msg import Entity
@@ -56,11 +58,21 @@ class TrafficController(Node):
 
         self.create_subscription(Clock, '/clock', self.on_clock, 10)
         self.create_subscription(TFMessage, f'/world/{world}/dynamic_pose/info', self.on_poses, 10)
+        self.gz_node = GzNode()
+        self.gz_node.subscribe(Pose_V, f'/world/{world}/dynamic_pose/info', self.on_gz_poses)
         self.create_timer(2.0, self.health_check)          # wall-clock timer
         self.create_timer(self.period, self.on_wall_tick)  # only used if /clock is missing
         self.get_logger().info(f'Traffic controller up. Waiting for /world/{world}/set_pose ...')
 
     # ---------------------------------------------------------------- inputs
+    def on_gz_poses(self, msg):
+        for p in msg.pose:
+            if p.name == self.robot_name or p.name.endswith('::' + self.robot_name):
+                if self.robot is None:
+                    self.get_logger().info(f'Locked onto robot pose via Gz ({p.name}) at ({p.position.x:.2f}, {p.position.y:.2f})')
+                self.robot = (float(p.position.x), float(p.position.y))
+                break
+
     def on_poses(self, msg):
         matched = None
         for tf in msg.transforms:
