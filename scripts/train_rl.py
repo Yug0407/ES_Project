@@ -14,6 +14,8 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import TwistStamped
 from tf2_msgs.msg import TFMessage
 
+from ros_gz_interfaces.srv import SetEntityPose
+from ros_gz_interfaces.msg import Entity
 from gz.transport13 import Node as GzNode
 from gz.msgs10.pose_pb2 import Pose
 from gz.msgs10.boolean_pb2 import Boolean
@@ -101,7 +103,9 @@ class DuckietownRLEnv(gym.Env):
             qos_profile_sensor_data,
         )
 
+        self.set_pose_cli = self.node.create_client(SetEntityPose, f"/world/{self.world_name}/set_pose")
         self.gz_node = GzNode()
+        time.sleep(0.5)
         if Pose_V is not None:
             self.gz_node.subscribe(
                 Pose_V,
@@ -288,20 +292,38 @@ class DuckietownRLEnv(gym.Env):
         ry = y + lat_offset * math.cos(yaw)
         ryaw = yaw + random.uniform(-0.12, 0.12)
 
-        req = Pose()
-        req.name = self.robot_name
-        req.position.x = rx
-        req.position.y = ry
-        req.position.z = 0.05
-        req.orientation.z = math.sin(ryaw / 2.0)
-        req.orientation.w = math.cos(ryaw / 2.0)
+        moved = False
+        if self.set_pose_cli.service_is_ready():
+            ros_req = SetEntityPose.Request()
+            ros_req.entity.name = self.robot_name
+            ros_req.entity.type = getattr(Entity, "MODEL", 2)
+            ros_req.pose.position.x = rx
+            ros_req.pose.position.y = ry
+            ros_req.pose.position.z = 0.05
+            ros_req.pose.orientation.z = math.sin(ryaw / 2.0)
+            ros_req.pose.orientation.w = math.cos(ryaw / 2.0)
+            fut = self.set_pose_cli.call_async(ros_req)
+            deadline = time.time() + 1.5
+            while not fut.done() and time.time() < deadline:
+                rclpy.spin_once(self.node, timeout_sec=0.01)
+            if fut.done() and fut.result() is not None and fut.result().success:
+                moved = True
 
-        service = f"/world/{self.world_name}/set_pose"
-        ok, _ = self.gz_node.request(service, req, Pose, Boolean, 2000)
-        if not ok:
-            print(f"[WARNING] Failed to call {service} for model '{self.robot_name}'")
+        if not moved:
+            req = Pose()
+            req.name = self.robot_name
+            req.position.x = rx
+            req.position.y = ry
+            req.position.z = 0.05
+            req.orientation.z = math.sin(ryaw / 2.0)
+            req.orientation.w = math.cos(ryaw / 2.0)
+            service = f"/world/{self.world_name}/set_pose"
+            ok, rep = self.gz_node.request(service, req, Pose, Boolean, 5000)
+            moved = bool(ok and (rep is None or getattr(rep, "data", True)))
+
+        if not moved:
+            print(f"[WARNING] Failed to teleport '{self.robot_name}' via ROS and Gz set_pose")
         else:
-            # Update fallback coordinates immediately on teleport
             self.gt_x = rx
             self.gt_y = ry
             self.gt_yaw = ryaw
@@ -377,10 +399,11 @@ class DuckietownRLEnv(gym.Env):
         r_drive = 2.0 * (self.v / self.v_max) * g_clear * (0.15 + 0.85 * g_lane)
 
         r_bound = 0.0
-        if e_lat > 0.11:
-            r_bound -= 3.0 * ((e_lat - 0.11) / 0.15) ** 2
-        elif e_lat < -0.11:
-            r_bound -= 3.0 * ((-0.11 - e_lat) / 0.13) ** 2
+        if e_lat > 0.13:
+            # Continuous recovery penalty across yellow line (+0.13 m -> +0.45 m)
+            r_bound -= 2.2 * ((e_lat - 0.13) / 0.22) ** 2
+        elif e_lat < -0.13:
+            r_bound -= 2.2 * ((-0.13 - e_lat) / 0.15) ** 2
 
         r_grass = -1.2 * max(0.0, self.lookahead_grass - 0.15)
 
@@ -451,7 +474,7 @@ class DuckietownRLEnv(gym.Env):
 
         crashed = min_dist < 0.21
         toppled = (abs(self.roll) + abs(self.pitch)) > 0.55
-        lane_violation = (e_lat > 0.26 or e_lat < -0.24) if self.gt_pose_received else False
+        lane_violation = (e_lat > 0.45 or e_lat < -0.28) if self.gt_pose_received else False
         fell_off_map = self.gt_z < -0.20
 
         reward = self._compute_reward(crashed, toppled, lane_violation, e_lat, e_psi)
@@ -471,17 +494,24 @@ if __name__ == "__main__":
     )
 
     env = DuckietownRLEnv()
+    ckpt_10k = "./checkpoints/sac_duckietown_v3_10000_steps.zip"
 
-    model = SAC(
-        "MlpPolicy",
-        env,
-        learning_rate=3e-4,
-        buffer_size=100_000,
-        batch_size=256,
-        policy_kwargs=dict(net_arch=[256, 256]),
-        verbose=1,
-    )
-    model.learn(total_timesteps=45_000, callback=checkpoint_cb)
+    if os.path.exists(ckpt_10k):
+        print(f"Warm-starting from {ckpt_10k} with +0.45m corner recovery buffer...")
+        model = SAC.load(ckpt_10k, env=env)
+        model.log_ent_coef.data.fill_(math.log(0.25))
+        model.learn(total_timesteps=25_000, reset_num_timesteps=False, callback=checkpoint_cb)
+    else:
+        model = SAC(
+            "MlpPolicy",
+            env,
+            learning_rate=3e-4,
+            buffer_size=100_000,
+            batch_size=256,
+            policy_kwargs=dict(net_arch=[256, 256]),
+            verbose=1,
+        )
+        model.learn(total_timesteps=35_000, callback=checkpoint_cb)
 
     model.save("sac_duckietown_final")
     print("Saved presentation model: sac_duckietown_final.zip")
