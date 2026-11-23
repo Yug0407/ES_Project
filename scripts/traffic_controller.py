@@ -62,10 +62,19 @@ class TrafficController(Node):
 
     # ---------------------------------------------------------------- inputs
     def on_poses(self, msg):
+        matched = None
         for tf in msg.transforms:
-            if tf.child_frame_id == self.robot_name:
-                t = tf.transform.translation
-                self.robot = (t.x, t.y)
+            fid = tf.child_frame_id
+            if fid == self.robot_name or fid.endswith("::" + self.robot_name) or fid.endswith("/" + self.robot_name):
+                matched = tf
+                break
+            if self.robot_name in fid and matched is None:
+                matched = tf
+        if matched is not None:
+            t = matched.transform.translation
+            if self.robot is None:
+                self.get_logger().info(f"Locked onto robot pose ({matched.child_frame_id}) at ({t.x:.2f}, {t.y:.2f})")
+            self.robot = (t.x, t.y)
 
     def on_clock(self, msg):
         now = msg.clock.sec + msg.clock.nanosec * 1e-9

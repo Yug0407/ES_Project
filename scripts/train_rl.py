@@ -17,6 +17,11 @@ from tf2_msgs.msg import TFMessage
 from gz.transport13 import Node as GzNode
 from gz.msgs10.pose_pb2 import Pose
 from gz.msgs10.boolean_pb2 import Boolean
+try:
+    from gz.msgs10.pose_v_pb2 import Pose_V
+except ImportError:
+    Pose_V = None
+
 from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import CheckpointCallback
 
@@ -97,6 +102,12 @@ class DuckietownRLEnv(gym.Env):
         )
 
         self.gz_node = GzNode()
+        if Pose_V is not None:
+            self.gz_node.subscribe(
+                Pose_V,
+                f"/world/{self.world_name}/dynamic_pose/info",
+                self._gz_pose_cb,
+            )
 
         self.lidar_sectors = np.full(self.num_sectors, self.max_lidar_range, dtype=np.float32)
         self.prev_lidar_sectors = np.full(self.num_sectors, self.max_lidar_range, dtype=np.float32)
@@ -151,7 +162,6 @@ class DuckietownRLEnv(gym.Env):
             min_c = np.minimum(np.minimum(r, g), b)
             sat = np.divide(max_c - min_c, max_c, out=np.zeros_like(max_c), where=max_c > 1e-4)
 
-            # Absolute calibrated surface detectors (no self-canceling roi_mean subtraction)
             asphalt = float(np.mean((brightness >= 0.06) & (brightness <= 0.42) & (sat < 0.24)))
             yellow = float(np.mean((r > 0.48) & (g > 0.40) & (b < 0.35)))
             white = float(np.mean((brightness > 0.68) & (sat < 0.22)))
@@ -176,9 +186,7 @@ class DuckietownRLEnv(gym.Env):
 
         norm_img = img.astype(np.float32) / 255.0
         h = msg.height
-        # Lookahead band (42%..68% height): sees upcoming turns & central park grass early
         lookahead_band = norm_img[int(h * 0.42):int(h * 0.68), :, :]
-        # Near band (68%..95% height): immediate lane position & yellow/white line tracking
         near_band = norm_img[int(h * 0.68):int(h * 0.95), :, :]
 
         near_feats, _ = self._extract_band_features(near_band)
@@ -196,15 +204,41 @@ class DuckietownRLEnv(gym.Env):
         self.roll, self.pitch, _ = quaternion_to_euler(q.x, q.y, q.z, q.w)
 
     def _gt_pose_cb(self, msg: TFMessage):
+        matched = None
         for t in msg.transforms:
-            if t.child_frame_id == self.robot_name or t.child_frame_id.endswith("/" + self.robot_name):
-                self.gt_x = float(t.transform.translation.x)
-                self.gt_y = float(t.transform.translation.y)
-                self.gt_z = float(t.transform.translation.z)
-                q = t.transform.rotation
-                _, _, self.gt_yaw = quaternion_to_euler(q.x, q.y, q.z, q.w)
-                self.gt_pose_received = True
+            fid = t.child_frame_id
+            if fid == self.robot_name or fid.endswith("::" + self.robot_name) or fid.endswith("/" + self.robot_name):
+                matched = t
                 break
+            if self.robot_name in fid and matched is None:
+                matched = t
+        if matched is not None:
+            self.gt_x = float(matched.transform.translation.x)
+            self.gt_y = float(matched.transform.translation.y)
+            self.gt_z = float(matched.transform.translation.z)
+            q = matched.transform.rotation
+            _, _, self.gt_yaw = quaternion_to_euler(q.x, q.y, q.z, q.w)
+            if not self.gt_pose_received:
+                print(f"[INFO] Ground-truth pose locked via ROS TF: '{matched.child_frame_id}'")
+            self.gt_pose_received = True
+
+    def _gz_pose_cb(self, msg):
+        matched = None
+        for p in msg.pose:
+            if p.name == self.robot_name or p.name.endswith("::" + self.robot_name):
+                matched = p
+                break
+            if self.robot_name in p.name and matched is None:
+                matched = p
+        if matched is not None:
+            self.gt_x = float(matched.position.x)
+            self.gt_y = float(matched.position.y)
+            self.gt_z = float(matched.position.z)
+            q = matched.orientation
+            _, _, self.gt_yaw = quaternion_to_euler(q.x, q.y, q.z, q.w)
+            if not self.gt_pose_received:
+                print(f"[INFO] Ground-truth pose locked via Gz transport: '{matched.name}'")
+            self.gt_pose_received = True
 
     def _wait_step_dt(self, duration: float):
         deadline = time.time() + duration
@@ -266,6 +300,11 @@ class DuckietownRLEnv(gym.Env):
         ok, _ = self.gz_node.request(service, req, Pose, Boolean, 2000)
         if not ok:
             print(f"[WARNING] Failed to call {service} for model '{self.robot_name}'")
+        else:
+            # Update fallback coordinates immediately on teleport
+            self.gt_x = rx
+            self.gt_y = ry
+            self.gt_yaw = ryaw
 
     def _get_obs(self):
         norm_lidar = self.lidar_sectors / self.max_lidar_range
@@ -305,6 +344,9 @@ class DuckietownRLEnv(gym.Env):
             if float(np.min(self.lidar_sectors)) > 0.60 and abs(e_lat) < 0.12 and self.gt_z > -0.10:
                 break
 
+        if not self.gt_pose_received and self.episode_num == 1:
+            print("[WARNING] Ground-truth pose stream not yet received; check dynamic_pose/info topic.")
+
         self.prev_lidar_sectors = self.lidar_sectors.copy()
         self.lidar_rates = np.zeros(self.num_sectors, dtype=np.float32)
         self.prev_v = self.v
@@ -328,42 +370,34 @@ class DuckietownRLEnv(gym.Env):
         min_dist = float(np.min(self.lidar_sectors))
         min_closing_rate = float(np.min(self.lidar_rates))
 
-        # 1. Progress-in-lane reward: strictly 0 when front_dist <= 0.60 m so robot stops instead of creeping
         alignment = max(0.0, math.cos(e_psi))
         lane_gauss = math.exp(-(e_lat ** 2) / (2.0 * (0.10 ** 2)))
         g_lane = lane_gauss * alignment
         g_clear = float(np.clip((front_dist - 0.60) / 0.70, 0.0, 1.0))
         r_drive = 2.0 * (self.v / self.v_max) * g_clear * (0.15 + 0.85 * g_lane)
 
-        # 2. Tight yellow-median (+0.11 m -> +0.26 m) & right-curb (-0.11 m -> -0.24 m) barriers
         r_bound = 0.0
         if e_lat > 0.11:
             r_bound -= 3.0 * ((e_lat - 0.11) / 0.15) ** 2
         elif e_lat < -0.11:
             r_bound -= 3.0 * ((-0.11 - e_lat) / 0.13) ** 2
 
-        # Penalize aiming toward central park grass in lookahead camera band
         r_grass = -1.2 * max(0.0, self.lookahead_grass - 0.15)
 
-        # 3. Safe Stopping & Yielding vs. Clear-Road Idling
         r_stop = 0.0
         if 0.28 <= front_dist <= 0.75:
-            # Obstacle/car in stopping zone: actively reward coming to a clean stop (v < 0.03 m/s) up to 4.5 s
             if self.v < 0.03 and self.stop_steps <= 45:
                 r_stop = 0.35 * g_lane
             elif self.stop_steps > 45:
                 r_stop = -0.25
         elif front_dist > 0.85 and self.stop_steps > 10:
-            # Penalize idling longer than 1.0 s on an open road
             r_stop = -0.65
 
-        # 4. Rear-approach evasion bonus: speed up when a car closes in from behind and front is clear
         rear_threat = (rear_dist < 1.35) and (rear_closing < -0.15)
         r_evade = 0.0
         if rear_threat and front_dist > 0.85:
             r_evade = 1.2 * (self.v / self.v_max) * g_lane
 
-        # 5. Obstacle & moving-car proximity barrier
         r_obst = 0.0
         if min_dist < 0.60:
             r_obst -= 2.0 * ((0.60 - min_dist) / 0.60) ** 2
@@ -371,7 +405,6 @@ class DuckietownRLEnv(gym.Env):
             prox_weight = (0.80 - min_dist) / 0.80
             r_obst -= 0.5 * abs(min_closing_rate) * prox_weight
 
-        # 6. Kinematic smoothness (waive linear accel penalty during rear-approach evasion) & stability
         accel_pen = 0.0 if rear_threat else 0.10 * abs(self.a / self.a_max)
         r_dyn = (
             -accel_pen
@@ -418,7 +451,6 @@ class DuckietownRLEnv(gym.Env):
 
         crashed = min_dist < 0.21
         toppled = (abs(self.roll) + abs(self.pitch)) > 0.55
-        # Terminate immediately upon touching yellow median (+0.26 m) or right curb (-0.24 m)
         lane_violation = (e_lat > 0.26 or e_lat < -0.24) if self.gt_pose_received else False
         fell_off_map = self.gt_z < -0.20
 
