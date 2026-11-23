@@ -5,3 +5,4 @@ eval_log.txt
 sac_turtlebot_logs/
 __pycache__/
 checkpoints/
+logs/
