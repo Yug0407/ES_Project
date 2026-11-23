@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import glob
 import math
 import time
 import random
@@ -25,7 +24,6 @@ from traffic_sim import LanePath, ROUTES
 
 WORLD_NAME = "duckietown_city"
 ROBOT_NAME = "waffle_pi"
-WARM_START = True
 
 
 def quaternion_to_euler(x, y, z, w):
@@ -50,6 +48,7 @@ class DuckietownRLEnv(gym.Env):
         self.dt = dt
         self.log_file = log_file
 
+        # Right-hand lane trajectories (0.30 m right of road centerline)
         self.spawn_lanes = [
             LanePath(ROUTES["big"], reverse=False),
             LanePath(ROUTES["big"], reverse=True),
@@ -65,17 +64,19 @@ class DuckietownRLEnv(gym.Env):
         self.lane_xy = np.array(pts_list, dtype=np.float32)
         self.lane_yaw = np.array(yaw_list, dtype=np.float32)
 
+        # Waffle Pi physical limits & acceleration caps
         self.v_min, self.v_max = 0.0, 0.26      # m/s
         self.w_min, self.w_max = -1.82, 1.82    # rad/s
         self.a_max = 0.5                        # m/s^2
         self.alpha_max = 2.5                    # rad/s^2
         self.num_sectors = 16
-        self.num_cam_strips = 5
         self.max_lidar_range = 3.5
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
-        obs_dim = self.num_sectors * 2 + self.num_cam_strips * 4 + 8
+        # Observation (64 dims — 100% onboard sensors):
+        # 16 LiDAR distances + 16 LiDAR closing rates + 24 camera features (Near + Lookahead) + 8 kinematics/IMU
+        obs_dim = self.num_sectors * 2 + 24 + 8
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
         )
@@ -101,7 +102,8 @@ class DuckietownRLEnv(gym.Env):
         self.prev_lidar_sectors = np.full(self.num_sectors, self.max_lidar_range, dtype=np.float32)
         self.lidar_rates = np.zeros(self.num_sectors, dtype=np.float32)
 
-        self.cam_features = np.zeros(self.num_cam_strips * 4, dtype=np.float32)
+        self.cam_features = np.zeros(24, dtype=np.float32)
+        self.lookahead_grass = 0.0
         self._last_cam_time = 0.0
 
         self.gt_x = -0.9
@@ -138,6 +140,27 @@ class DuckietownRLEnv(gym.Env):
         chunks = np.array_split(ranges, self.num_sectors)
         self.lidar_sectors = np.array([np.min(c) for c in chunks], dtype=np.float32)
 
+    def _extract_band_features(self, band: np.ndarray):
+        strips = np.array_split(band, 3, axis=1)  # Left, Center, Right
+        feats = []
+        grass_vals = []
+        for s in strips:
+            r, g, b = s[:, :, 0], s[:, :, 1], s[:, :, 2]
+            brightness = (r + g + b) / 3.0
+            max_c = np.maximum(np.maximum(r, g), b)
+            min_c = np.minimum(np.minimum(r, g), b)
+            sat = np.divide(max_c - min_c, max_c, out=np.zeros_like(max_c), where=max_c > 1e-4)
+
+            # Absolute calibrated surface detectors (no self-canceling roi_mean subtraction)
+            asphalt = float(np.mean((brightness >= 0.06) & (brightness <= 0.42) & (sat < 0.24)))
+            yellow = float(np.mean((r > 0.48) & (g > 0.40) & (b < 0.35)))
+            white = float(np.mean((brightness > 0.68) & (sat < 0.22)))
+            grass = float(np.mean((g > r + 0.05) & (g > b + 0.05) & (g > 0.18)))
+
+            feats.extend([asphalt, yellow, white, grass])
+            grass_vals.append(grass)
+        return feats, float(np.mean(grass_vals))
+
     def _image_cb(self, msg: Image):
         now = time.time()
         if now - self._last_cam_time < 0.08:
@@ -151,25 +174,18 @@ class DuckietownRLEnv(gym.Env):
         if msg.encoding == "bgr8":
             img = img[:, :, ::-1]
 
-        roi = img[int(msg.height * 0.55):, :, :].astype(np.float32) / 255.0
-        roi_mean = float(np.mean(roi))
-        strips = np.array_split(roi, self.num_cam_strips, axis=1)
+        norm_img = img.astype(np.float32) / 255.0
+        h = msg.height
+        # Lookahead band (42%..68% height): sees upcoming turns & central park grass early
+        lookahead_band = norm_img[int(h * 0.42):int(h * 0.68), :, :]
+        # Near band (68%..95% height): immediate lane position & yellow/white line tracking
+        near_band = norm_img[int(h * 0.68):int(h * 0.95), :, :]
 
-        feats = []
-        for s in strips:
-            r, g, b = s[:, :, 0], s[:, :, 1], s[:, :, 2]
-            brightness = (r + g + b) / 3.0
-            max_c = np.maximum(np.maximum(r, g), b)
-            min_c = np.minimum(np.minimum(r, g), b)
-            sat = np.where(max_c > 1e-4, (max_c - min_c) / max_c, 0.0)
+        near_feats, _ = self._extract_band_features(near_band)
+        look_feats, look_grass = self._extract_band_features(lookahead_band)
 
-            asphalt = float(np.mean(((brightness - roi_mean) < -0.04) & (brightness < 0.42) & (sat < 0.25)))
-            yellow = float(np.mean((r > 0.50) & (g > 0.42) & (b < 0.35)))
-            white = float(np.mean((brightness > 0.70) & (sat < 0.22)))
-            grass = float(np.mean((g > r + 0.07) & (g > b + 0.07) & (g > 0.22)))
-            feats.extend([asphalt, yellow, white, grass])
-
-        self.cam_features = np.array(feats, dtype=np.float32)
+        self.cam_features = np.array(near_feats + look_feats, dtype=np.float32)
+        self.lookahead_grass = look_grass
 
     def _odom_cb(self, msg: Odometry):
         self.v = float(msg.twist.twist.linear.x)
@@ -233,10 +249,10 @@ class DuckietownRLEnv(gym.Env):
         lane = random.choice(self.spawn_lanes)
         x, y, yaw = lane.pose(random.uniform(0.0, lane.length))
 
-        lat_offset = random.uniform(-0.06, 0.06)
+        lat_offset = random.uniform(-0.05, 0.05)
         rx = x - lat_offset * math.sin(yaw)
         ry = y + lat_offset * math.cos(yaw)
-        ryaw = yaw + random.uniform(-0.15, 0.15)
+        ryaw = yaw + random.uniform(-0.12, 0.12)
 
         req = Pose()
         req.name = self.robot_name
@@ -286,7 +302,7 @@ class DuckietownRLEnv(gym.Env):
             self._teleport_random_lane_pose()
             self._wait_step_dt(0.30)
             e_lat, _ = self._compute_lane_errors()
-            if float(np.min(self.lidar_sectors)) > 0.55 and abs(e_lat) < 0.15 and self.gt_z > -0.10:
+            if float(np.min(self.lidar_sectors)) > 0.60 and abs(e_lat) < 0.12 and self.gt_z > -0.10:
                 break
 
         self.prev_lidar_sectors = self.lidar_sectors.copy()
@@ -304,52 +320,67 @@ class DuckietownRLEnv(gym.Env):
     def _compute_reward(self, crashed: bool, toppled: bool, lane_violation: bool, e_lat: float, e_psi: float) -> float:
         if crashed or toppled or lane_violation:
             speed_ratio = self.v / self.v_max
-            return -20.0 - 10.0 * (speed_ratio ** 2)
+            return -22.0 - 10.0 * (speed_ratio ** 2)
 
-        front_dist = float(min(self.lidar_sectors[0], self.lidar_sectors[-1], self.lidar_sectors[1]))
+        front_dist = float(min(self.lidar_sectors[0], self.lidar_sectors[15], self.lidar_sectors[1]))
+        rear_dist = float(min(self.lidar_sectors[6], self.lidar_sectors[7], self.lidar_sectors[8], self.lidar_sectors[9]))
+        rear_closing = float(min(self.lidar_rates[6], self.lidar_rates[7], self.lidar_rates[8], self.lidar_rates[9]))
         min_dist = float(np.min(self.lidar_sectors))
         min_closing_rate = float(np.min(self.lidar_rates))
 
-        # 1. Unified progress-in-lane reward (strictly 0 when v == 0 -> no stationary farming)
+        # 1. Progress-in-lane reward: strictly 0 when front_dist <= 0.60 m so robot stops instead of creeping
         alignment = max(0.0, math.cos(e_psi))
-        lane_gauss = math.exp(-(e_lat ** 2) / (2.0 * (0.11 ** 2)))
+        lane_gauss = math.exp(-(e_lat ** 2) / (2.0 * (0.10 ** 2)))
         g_lane = lane_gauss * alignment
-        g_clear = float(np.clip((front_dist - 0.25) / 0.95, 0.0, 1.0))
-        r_drive = 2.0 * (self.v / self.v_max) * g_clear * (0.20 + 0.80 * g_lane)
+        g_clear = float(np.clip((front_dist - 0.60) / 0.70, 0.0, 1.0))
+        r_drive = 2.0 * (self.v / self.v_max) * g_clear * (0.15 + 0.85 * g_lane)
 
-        # 2. Lane-edge quadratic barrier (reaches -2.50 right at termination walls)
+        # 2. Tight yellow-median (+0.11 m -> +0.26 m) & right-curb (-0.11 m -> -0.24 m) barriers
         r_bound = 0.0
-        if e_lat > 0.14:
-            r_bound -= 2.5 * ((e_lat - 0.14) / 0.22) ** 2
-        elif e_lat < -0.14:
-            r_bound -= 2.5 * ((-0.14 - e_lat) / 0.16) ** 2
+        if e_lat > 0.11:
+            r_bound -= 3.0 * ((e_lat - 0.11) / 0.15) ** 2
+        elif e_lat < -0.11:
+            r_bound -= 3.0 * ((-0.11 - e_lat) / 0.13) ** 2
 
-        # 3. Proximity-weighted obstacle & closing-rate repulsion
+        # Penalize aiming toward central park grass in lookahead camera band
+        r_grass = -1.2 * max(0.0, self.lookahead_grass - 0.15)
+
+        # 3. Safe Stopping & Yielding vs. Clear-Road Idling
+        r_stop = 0.0
+        if 0.28 <= front_dist <= 0.75:
+            # Obstacle/car in stopping zone: actively reward coming to a clean stop (v < 0.03 m/s) up to 4.5 s
+            if self.v < 0.03 and self.stop_steps <= 45:
+                r_stop = 0.35 * g_lane
+            elif self.stop_steps > 45:
+                r_stop = -0.25
+        elif front_dist > 0.85 and self.stop_steps > 10:
+            # Penalize idling longer than 1.0 s on an open road
+            r_stop = -0.65
+
+        # 4. Rear-approach evasion bonus: speed up when a car closes in from behind and front is clear
+        rear_threat = (rear_dist < 1.35) and (rear_closing < -0.15)
+        r_evade = 0.0
+        if rear_threat and front_dist > 0.85:
+            r_evade = 1.2 * (self.v / self.v_max) * g_lane
+
+        # 5. Obstacle & moving-car proximity barrier
         r_obst = 0.0
-        if min_dist < 0.65:
-            r_obst -= 1.8 * ((0.65 - min_dist) / 0.65) ** 2
-        if min_dist < 0.85 and min_closing_rate < 0.0:
-            prox_weight = (0.85 - min_dist) / 0.85
+        if min_dist < 0.60:
+            r_obst -= 2.0 * ((0.60 - min_dist) / 0.60) ** 2
+        if min_dist < 0.80 and min_closing_rate < 0.0:
+            prox_weight = (0.80 - min_dist) / 0.80
             r_obst -= 0.5 * abs(min_closing_rate) * prox_weight
 
-        # 4. Context-aware timed stopping (4.0 s traffic grace, 1.0 s clear-road grace)
-        r_stall = 0.0
-        if front_dist < 1.15:
-            if self.stop_steps > 40:
-                r_stall = -0.25
-        else:
-            if self.stop_steps > 10:
-                r_stall = -0.65
-
-        # 5. Kinematic smoothness & rollover stability
+        # 6. Kinematic smoothness (waive linear accel penalty during rear-approach evasion) & stability
+        accel_pen = 0.0 if rear_threat else 0.10 * abs(self.a / self.a_max)
         r_dyn = (
-            -0.10 * abs(self.a / self.a_max)
+            -accel_pen
             - 0.12 * abs(self.alpha / self.alpha_max)
             - 0.08 * abs((self.v * self.w) / (self.v_max * self.w_max))
         )
         r_stab = -2.5 * (self.roll ** 2 + self.pitch ** 2) - 0.4 * (self.tilt_rate ** 2)
 
-        return r_drive + r_bound + r_obst + r_stall + r_dyn + r_stab
+        return r_drive + r_bound + r_grass + r_stop + r_evade + r_obst + r_dyn + r_stab
 
     def step(self, action):
         self.step_count += 1
@@ -363,7 +394,7 @@ class DuckietownRLEnv(gym.Env):
         self._publish_cmd(v_cmd, w_cmd)
         self._wait_step_dt(self.dt)
 
-        if self.v < 0.04:
+        if self.v < 0.03:
             self.stop_steps += 1
         else:
             self.stop_steps = 0
@@ -387,7 +418,8 @@ class DuckietownRLEnv(gym.Env):
 
         crashed = min_dist < 0.21
         toppled = (abs(self.roll) + abs(self.pitch)) > 0.55
-        lane_violation = (e_lat > 0.36 or e_lat < -0.30) if self.gt_pose_received else False
+        # Terminate immediately upon touching yellow median (+0.26 m) or right curb (-0.24 m)
+        lane_violation = (e_lat > 0.26 or e_lat < -0.24) if self.gt_pose_received else False
         fell_off_map = self.gt_z < -0.20
 
         reward = self._compute_reward(crashed, toppled, lane_violation, e_lat, e_psi)
@@ -398,39 +430,26 @@ class DuckietownRLEnv(gym.Env):
         return self._get_obs(), float(reward), terminated, truncated, {}
 
 
-def find_latest_checkpoint(checkpoint_dir="./checkpoints"):
-    files = glob.glob(os.path.join(checkpoint_dir, "*.zip"))
-    if not files:
-        return None
-    return max(files, key=os.path.getmtime)
-
-
 if __name__ == "__main__":
     os.makedirs("checkpoints", exist_ok=True)
     checkpoint_cb = CheckpointCallback(
         save_freq=5_000,
         save_path="./checkpoints/",
-        name_prefix="sac_duckietown_v2",
+        name_prefix="sac_duckietown_v3",
     )
 
     env = DuckietownRLEnv()
-    latest_ckpt = find_latest_checkpoint() if WARM_START else None
 
-    if latest_ckpt:
-        print(f"Warm-starting from {latest_ckpt} with calibrated hierarchical rewards...")
-        model = SAC.load(latest_ckpt, env=env)
-        model.learn(total_timesteps=35_000, reset_num_timesteps=True, callback=checkpoint_cb)
-    else:
-        model = SAC(
-            "MlpPolicy",
-            env,
-            learning_rate=3e-4,
-            buffer_size=100_000,
-            batch_size=256,
-            policy_kwargs=dict(net_arch=[256, 256]),
-            verbose=1,
-        )
-        model.learn(total_timesteps=40_000, callback=checkpoint_cb)
+    model = SAC(
+        "MlpPolicy",
+        env,
+        learning_rate=3e-4,
+        buffer_size=100_000,
+        batch_size=256,
+        policy_kwargs=dict(net_arch=[256, 256]),
+        verbose=1,
+    )
+    model.learn(total_timesteps=45_000, callback=checkpoint_cb)
 
     model.save("sac_duckietown_final")
     print("Saved presentation model: sac_duckietown_final.zip")
