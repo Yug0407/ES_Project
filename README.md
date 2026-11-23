@@ -245,3 +245,83 @@ ES_Project/
 ├── README.md                        # Project documentation & setup instructions
 └── SETUP.md                         # Detailed environment setup notes
 ```
+
+---
+
+## 🧠 Autonomous Driving with Soft Actor-Critic (SAC)
+
+In addition to manual teleoperation and discrete baseline nodes, this repository includes an end-to-end **Soft Actor-Critic (SAC)** continuous control pipeline (`sac_duckietown_final.zip`) trained in **Duckietown** using onboard sensors only (**360° LiDAR**, **RGB camera**, **wheel odometry**, and **IMU**).
+
+### 1. Install Python RL Dependencies
+Inside your Ubuntu 24.04 environment (or an active Python virtual environment):
+```bash
+pip install stable-baselines3 gymnasium numpy matplotlib
+```
+*(If installing globally outside a virtual environment on Ubuntu 24.04, add `--break-system-packages` to the `pip install` command.)*
+
+### 2. Run the Pretrained SAC Policy (Live Demo / Inference)
+
+Open **two terminals** and source ROS 2 Jazzy in each.
+
+#### Terminal 1 — Launch Duckietown World & NPC Traffic
+Launch without overriding `x_pose`/`y_pose` so `waffle_pi` spawns at the default right-hand lane position (`x=0.60, y=0.30`) clear of surrounding NPC vehicles:
+```bash
+cd ~/ES_Project
+source /opt/ros/jazzy/setup.bash
+export TURTLEBOT3_MODEL=waffle_pi
+ros2 launch launch/duckietown_world.launch.py
+```
+Wait 8–10 seconds until Gazebo opens and `traffic_controller` prints:
+```text
+[traffic_controller]: Locked onto robot pose via Gz (waffle_pi) at (0.60, 0.30)
+```
+*(Tip: In Gazebo's left-hand **Entity Tree**, right-click **`waffle_pi`** and select **Follow** to keep the camera locked on the robot.)*
+
+#### Terminal 2 — Start Deterministic Runtime Inference
+```bash
+cd ~/ES_Project
+source /opt/ros/jazzy/setup.bash
+python3 scripts/run_inference.py --model sac_duckietown_final.zip
+```
+* Runs the trained `[256, 256]` MLP actor at **10 Hz** (`deterministic=True`) with acceleration and angular-acceleration smoothing (`a_max = 0.5 m/s²`, `alpha_max = 2.5 rad/s²`).
+* Press **`Ctrl + C`** (or pass `--max-steps 300`) to stop the robot cleanly (`0.0 m/s`).
+
+### 3. Observation & Action Space Architecture
+
+* **Observation Space (`64` continuous features):**
+  * `16` normalized LiDAR sector minimum distances (`/scan`, max `3.5 m`)
+  * `16` normalized LiDAR sector closing rates (`m/s`)
+  * `24` RGB camera road features (`/camera/image_raw` split into Near and Lookahead bands × Left/Center/Right strips × `[asphalt, yellow, white, grass]`)
+  * `8` kinematic & IMU stability states (`v`, `w`, `a`, `alpha`, centripetal `v*w`, `roll`, `pitch`, `tilt_rate`)
+* **Action Space (`2` continuous commands):**
+  * Target linear velocity `v` in `[0.0, 0.26] m/s`
+  * Target angular velocity `w` in `[-1.82, 1.82] rad/s`
+
+### 4. Retraining & Plotting Training Curves (Optional)
+
+With `duckietown_world.launch.py` running in Terminal 1:
+```bash
+cd ~/ES_Project
+source /opt/ros/jazzy/setup.bash
+python3 scripts/train_rl.py
+```
+* Saves intermediate checkpoints every `5,000` steps to `./checkpoints/` (ignored by Git via `.gitignore`) and writes the final weights to `sac_duckietown_final.zip`.
+
+To regenerate the training diagnostic plots (`plots/training_curves.png`):
+```bash
+cd ~/ES_Project
+python3 scripts/plot_training.py
+```
+
+### 5. Additional SAC Pipeline Files
+```text
+ES_Project/
+├── plots/
+│   └── training_curves.png          # Episode survival length, returns, SAC losses, and entropy decay
+├── scripts/
+│   ├── run_inference.py             # Deterministic (deterministic=True) 10 Hz runtime controller
+│   ├── train_rl.py                  # 64-dim Gymnasium environment & SAC training pipeline
+│   ├── traffic_controller.py        # Multi-vehicle & pedestrian manager with Gazebo pose yielding
+│   └── traffic_sim.py               # Right-hand lane spline definitions ("big" & "west" loops)
+└── sac_duckietown_final.zip         # Pretrained SAC policy weights ready for deployment
+```
